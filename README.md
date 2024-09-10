@@ -1,0 +1,2 @@
+# naloga
+Naloga za SMV
