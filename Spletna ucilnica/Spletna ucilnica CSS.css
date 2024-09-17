@@ -10,6 +10,11 @@ header{
     height: 90%;
     width: 40%;
 }
+#logoButton{
+    background-color:transparent; 
+    border-color: transparent; 
+    cursor: pointer;
+}
 #headerText{
     font-size: 60px;
     font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
@@ -42,6 +47,9 @@ header{
 }
 .gridItem{
     background-color: rgb(89, 197, 255);
+}
+.gridItem:hover{
+    background-color:rgb(116, 238, 252);
 }
 #navigationList{
     list-style-type: none;
