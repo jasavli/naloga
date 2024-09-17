@@ -1,6 +1,17 @@
 CREATE DATABASE SpletnaUcilnica
 USE SpletnaUcilnica
 
+CREATE TABLE Administrator
+(
+ id_administratorja int NOT NULL PRIMARY KEY,
+ ime         nvarchar(50) NOT NULL ,
+ priimek     nvarchar(50) NOT NULL ,
+ tel_st    int NOT NULL ,
+ mail        nvarchar(50) NOT NULL ,
+ kabinet     nvarchar(50),
+ geslo password(20) NOT NULL,
+);
+
 CREATE TABLE Ucitelj
 (
  id_ucitelja int NOT NULL PRIMARY KEY,
@@ -9,6 +20,7 @@ CREATE TABLE Ucitelj
  tel_st    int NOT NULL ,
  mail        nvarchar(50) NOT NULL ,
  kabinet     nvarchar(50) NOT NULL ,
+ geslo password(20) NOT NULL,
 );
 
 
@@ -28,6 +40,7 @@ CREATE TABLE Ucenec
  tel_st   int NULL ,
  emso       int NOT NULL ,
  id_razreda nvarchar(3) NOT NULL FOREIGN KEY REFERENCES Razred(id_razreda),
+ geslo password(20) NOT NULL,
 );
 
 
