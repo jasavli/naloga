@@ -68,3 +68,12 @@ header{
     text-align: center;
     background-color: lightgrey;
 }
+.optionsDiv{
+    align-items: center;
+    width: 50%;
+    height: 1000px;
+    background-color: rgb(170, 168, 168);
+    margin-left: 25%;
+    margin-top: 30px;
+    
+}
