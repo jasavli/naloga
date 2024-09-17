@@ -90,8 +90,11 @@
         <label for="lastname">Priimek</label>
         <input type="text" id="lastname" name="lastname" class="form-control" required>
 
-        <label for="username">Uporabniško ime</label>
-        <input type="text" id="username" name="username" class="form-control" required>
+        <label for="phone">Telefonska številka</label>
+        <input type="tel" id="phone" name="phone" class="form-control" required>
+
+        <label for="emso">EMŠO</label>
+        <input type="text" id="emso" name="emso" class="form-control" required>
 
         <label for="email">E-poštni naslov</label>
         <input type="email" id="email" name="email" class="form-control" required>
