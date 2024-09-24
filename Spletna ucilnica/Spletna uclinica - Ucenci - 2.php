@@ -29,12 +29,45 @@
             function OpenNew(){
                 window.open("Spletna%20uclinica%20-%20Ucenci.php","_self");
             }
-
+            function toggleDetails(element) {
+                var details = element.nextElementSibling;
+                details.classList.toggle("open");
+}
 
         </script>
-        <ul class="allWorks">
-            <li>Hello</li>
+        <div class="assignmentSection">
+        <h2>Seznam nalog</h2>
+        <ul class="assignmentList">
+            <li class="assignmentItem">
+                <div class="assignmentTitle" onclick="toggleDetails(this)">Matematika: Reši enačbe</div>
+                <div class="assignmentDetails">
+                    <p>Opis: Reši 10 enačb različnih težavnosti, ki vključujejo kvadratne enačbe in logaritme.</p>
+                    <p>Rok: 30. september 2024</p>
+                </div>
+            </li>
+            <li class="assignmentItem">
+                <div class="assignmentTitle" onclick="toggleDetails(this)">Slovenščina: Napiši esej</div>
+                <div class="assignmentDetails">
+                    <p>Opis: Napiši esej na temo "Pomembnost slovenskega jezika v sodobni družbi".</p>
+                    <p>Rok: 1. oktober 2024</p>
+                </div>
+            </li>
+            <li class="assignmentItem">
+                <div class="assignmentTitle" onclick="toggleDetails(this)">Zgodovina: Pripravi predstavitev</div>
+                <div class="assignmentDetails">
+                    <p>Opis: Pripravi 10-minutno predstavitev o vzrokih prve svetovne vojne.</p>
+                    <p>Rok: 28. september 2024</p>
+                </div>
+            </li>
+            <li class="assignmentItem">
+                <div class="assignmentTitle" onclick="toggleDetails(this)">Kemija: Eksperimentiraj</div>
+                <div class="assignmentDetails">
+                    <p>Opis: Opravi eksperiment, kjer preizkusiš kislost različnih gospodinjskih snovi.</p>
+                    <p>Rok: 2. oktober 2024</p>
+                </div>
+            </li>
         </ul>
+    </div>
     </div>
 </body>
 </html>
