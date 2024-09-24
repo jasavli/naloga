@@ -14,11 +14,12 @@ header{
     background-color:transparent; 
     border-color: transparent; 
     cursor: pointer;
+    margin-left: 50%;
 }
 #headerText{
     font-size: 60px;
     font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
-    width: 80%;
+    width: 75%;
     text-align: center;
     
 }
@@ -76,4 +77,34 @@ header{
     margin-left: 25%;
     margin-top: 30px;
     
+}
+form {
+    font-family: 'Lucida Sans', Geneva, Verdana, sans-serif;
+    font-size: 20px;
+    margin: 20px;
+}
+
+input[type="text"], input[type="password"] {
+    width: 100%;
+    padding: 12px 20px;
+    margin: 8px 0;
+    box-sizing: border-box;
+    border: 2px solid #59C5FF;
+    border-radius: 4px;
+    background-color: #f8f8f8;
+    font-size: 20px;
+}
+
+input[type="submit"] {
+    background-color: #59C5FF;
+    color: white;
+    padding: 14px 20px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    margin-top: 20px;
+}
+
+input[type="submit"]:hover {
+    background-color: #74EEF4;
 }
