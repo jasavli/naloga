@@ -20,28 +20,21 @@
     <div class="outerDiv">
         <div class="navigationDiv">
             <ul id="navigationList">
-                <li style="background-color:grey;">PREDMETI</li>
-                <li onclick = "OpenNew()">ZA PREGLED</li>
+                <li onclick = "OpenNew()">PREDMETI</li>
+                <li style="background-color:grey;">ZA PREGLED</li>
             </ul>
         </div>
         
         <script>
             function OpenNew(){
-                window.open("Spletna%20uclinica%20-%20Ucenci%20-%202.php", "_self");
+                window.open("Spletna%20uclinica%20-%20Ucenci.php","_self");
             }
 
 
         </script>
-        <div class="optionGrid">
-            <div class="gridItem"></div>
-            <div class="gridItem"></div>
-            <div class="gridItem"></div>
-            <div class="gridItem"></div>
-            <div class="gridItem"></div>
-            <div class="gridItem"></div>
-            <div class="gridItem"></div>
-            <div class="gridItem"></div>
-        </div>
+        <ul class="allWorks">
+            <li>Hello</li>
+        </ul>
     </div>
 </body>
 </html>
