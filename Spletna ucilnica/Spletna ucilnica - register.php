@@ -93,22 +93,52 @@
         <label for="phone">Telefonska številka</label>
         <input type="tel" id="phone" name="phone" class="form-control" required>
 
-        <label for="emso">EMŠO</label>
-        <input type="text" id="emso" name="emso" class="form-control" required>
-
         <label for="email">E-poštni naslov</label>
         <input type="email" id="email" name="email" class="form-control" required>
 
         <label for="password">Geslo</label>
         <input type="password" id="password" name="password" class="form-control" required>
 
-        <label for="confirm_password">Potrdi geslo</label>
-        <input type="password" id="confirm_password" name="confirm_password" class="form-control" required>
-
         <button type="submit" class="register-button">POTRDI</button>
         
         <p class="login-link"><a href="Spletna ucilnica - login.php">Že imaš račun?</a></p>
     </form>
 </div>
+
+<?php
+
+function openDatabaseConnection(){
+    $link = new mysqli("localhost", "root", "", "SpletnaUcilnica");
+    $link->query("SET NAMES 'utf8'");
+    return $link;
+}
+function closeDatabaseConnection($link){
+    mysqli_close($link);
+}
+if(array_key_exists('buttonSignin', $_POST) && !(empty($_POST['firstname']) || empty($_POST['lastname']) || empty($_POST['mail']) || empty($_POST['password']) ||empty($_POST['phone']))){
+    $ime = $_POST['firstname'];
+    $priimek = $_POST['lastname'];
+    $mail = $_POST['mail'];
+    $geslo = $_POST['password'];
+    $link = openDatabaseConnection();
+    $sql = "INSERT INTO uporabnik(ime, priimek, vrsta, mail, geslo) VALUES('$ime', '$priimek', 'uporabnik', '$mail','$geslo')";
+    mysqli_query($link, $sql);
+    closeDatabaseConnection($link);
+    echo '<script>document.getElementById("alert").innerHTML = "";</script>';
+    header("Location: ".$_SERVER['PHP_SELF']);
+    exit();
+
+} 
+elseif(array_key_exists('buttonSignin', $_POST) && (empty($_POST['firstName']) || empty($_POST['lastName']) || empty($_POST['mail']) || empty($_POST['password']))){
+    echo '<script>document.getElementById("alert").innerHTML = "Please enter all of the information";</script>';
+}
+
+
+
+
+
+
+?>
+
 </body>
 </html>

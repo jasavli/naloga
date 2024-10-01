@@ -9,11 +9,50 @@
     <script src='main.js'></script>
 </head>
 <body>
+<?php
+function openDatabaseConnection(){
+    $link = new mysqli("localhost", "root", "", "SpletnaUcilnica");
+    $link->query("SET NAMES 'utf8'");
+    return $link;
+}
+function closeDatabaseConnection($link){
+    mysqli_close($link);
+}
+$link = openDatabaseConnection();
+session_start();
+$mail = $_SESSION['mail'];
+$sql = "SELECT ime, priimek, mail, geslo, tel_st, kabinet FROM Uporabnik WHERE mail = '$mail'";
+$result = mysqli_query($link, $sql);
+if(mysqli_num_rows($result) > 0){
+    while($row = mysqli_fetch_assoc($result)) {
+        $ime = $row["ime"];
+        $priimek = $row["priimek"];
+        $mail = $row["mail"];
+        $geslo = $row["geslo"];
+        $tel_st = $row["tel_st"];
+        $kabinet = $row["kabinet"];
+    }
+    echo "<script>
+    window.onload = function() {
+    document.getElementById('logoButton').innerHTML = '$ime' . ' ' . '$priimek'};
+    </script>";
+}
+
+
+
+
+
+closeDatabaseConnection($link)
+
+?>
+
+
+
     <header>
         <ul id="headerList">
             <li><img id="logoPic"src="Slike/book.png"></li>
             <li id="headerText">SPLETNA UČILNICA</li>
-            <li><button id="logoButton"><img style="height: 80px;margin: 10% 0 0 0;"src="Slike/user.png"></button></li>
+            <li><button id="logoButton"></button></li>
         </ul>
     </header>
 
