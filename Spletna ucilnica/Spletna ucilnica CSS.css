@@ -263,3 +263,71 @@ input[type="submit"] {
 input[type="submit"]:hover {
     background-color: #74EEF4;
 }
+
+/* Skupni stili za oba obrazca */
+.form-container {
+    width: 50%;
+    margin: 0 auto; /* Center align */
+    background-color: #f0f0f0;
+    padding: 30px;
+    border-radius: 8px;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+    margin-top: 50px;
+    font-family: 'Lucida Sans', Geneva, Verdana, sans-serif;
+}
+
+.form-title {
+    font-size: 32px;
+    margin-bottom: 20px;
+    color: #333;
+    text-align: center;
+}
+
+.form-label {
+    font-size: 18px;
+    margin: 10px 0 5px 0;
+    display: block;
+}
+
+.form-input {
+    width: 100%;
+    padding: 12px;
+    margin-bottom: 20px;
+    box-sizing: border-box;
+    border: 2px solid #59C5FF;
+    border-radius: 4px;
+    background-color: #f8f8f8;
+    font-size: 18px;
+}
+
+.form-button {
+    width: 100%;
+    background-color: #59C5FF;
+    color: white;
+    padding: 14px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 18px;
+    margin-top: 10px;
+}
+
+.form-button:hover {
+    background-color: #74EEF4;
+}
+
+.form-link {
+    text-align: center;
+    margin-top: 20px;
+    font-size: 16px;
+}
+
+.form-link a {
+    color: #59C5FF;
+    text-decoration: none;
+}
+
+.form-link a:hover {
+    text-decoration: underline;
+}
+
