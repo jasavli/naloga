@@ -16,21 +16,48 @@ if (!isset($_SESSION['logged_in'])) {
     <title>Spletna učilnica</title>
     <link rel='stylesheet' type='text/css' media='screen' href='Spletna ucilnica CSS.css'>
     <script src='main.js'></script>
+    <style>
+        /* Stil za prikaz imena uporabnika in gumb za odjavo */
+        .user-info {
+            position: absolute;
+            top: 10px;
+            right: 20px;
+            font-size: 18px;
+        }
+
+        .user-info a {
+            margin-left: 10px;
+            background-color: #f44336;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 5px;
+            text-decoration: none;
+        }
+
+        .user-info a:hover {
+            background-color: #d32f2f;
+        }
+    </style>
 </head>
 <body>
 <header>
-        <ul id="headerList">
-            <li><img id="logoPic"src="Slike/book.png"></li>
-            <li id="headerText">SPLETNA UČILNICA</li>
-            <li><img style="height: 80px;margin: 10% 0 0 0;"src="Slike/user.png"></li>
-        </ul>
+    <ul id="headerList">
+        <li><img id="logoPic" src="Slike/book.png"></li>
+        <li id="headerText">SPLETNA UČILNICA</li>
+        <li class="user-info">
+            <!-- Prikaz imena in priimka prijavljenega uporabnika -->
+            <?php echo $_SESSION['user_name']; ?>
+            <!-- Povezava za odjavo -->
+            <a href="logout.php">Odjava</a>
+        </li>
+    </ul>
 </header>
 
 <div class="outerDiv">
     <div class="navigationDiv">
         <ul id="navigationList">
             <li style="background-color:grey;">PREDMETI</li>
-            <li onclick = "OpenNew()">ZA PREGLED</li>
+            <li onclick="OpenNew()">ZA PREGLED</li>
         </ul>
     </div>
 
@@ -44,12 +71,6 @@ if (!isset($_SESSION['logged_in'])) {
         <div class="gridItem"></div>
         <div class="gridItem"></div>
     </div>
-</div>
-
-<!-- Prikaz prijavljenega uporabnika -->
-<div class="user-info">
-    <p>Prijavljeni ste kot: <?php echo $_SESSION['user_name']; ?></p>
-    <a href="logout.php">Odjava</a> <!-- Odjava uporabnika -->
 </div>
 
 <script>
