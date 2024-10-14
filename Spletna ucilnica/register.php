@@ -2,50 +2,63 @@
 session_start();
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    if (!empty($_POST['firstname']) && !empty($_POST['lastname']) && !empty($_POST['email']) && !empty($_POST['password'])) {
+    if (!empty($_POST['firstname']) && !empty($_POST['lastname']) && !empty($_POST['email']) && !empty($_POST['password']) && !empty($_POST['id_razreda'])) {
         $firstname = $_POST['firstname'];
         $lastname = $_POST['lastname'];
         $email = $_POST['email'];
         $password = $_POST['password'];
-        
+        $id_razreda = $_POST['id_razreda'];
+
         $link = new mysqli("localhost", "root", "", "SpletnaUcilnica");
 
         if ($link->connect_error) {
             die("Povezava ni uspela: " . $link->connect_error);
         }
 
-        // Preverimo, če uporabnik že obstaja
-        $query = "SELECT * FROM Ucenec WHERE mail = ?";
+        // Preverimo, ali id_razreda obstaja v tabeli Razred
+        $query = "SELECT * FROM Razred WHERE id_razreda = ?";
         $stmt = $link->prepare($query);
-        $stmt->bind_param("s", $email);
+        $stmt->bind_param("s", $id_razreda);
         $stmt->execute();
         $result = $stmt->get_result();
 
-        if ($result->num_rows > 0) {
-            echo "Uporabnik s tem e-poštnim naslovom že obstaja.";
+        if ($result->num_rows == 0) {
+            echo "Razred z ID-jem $id_razreda ne obstaja.";
         } else {
-            // Šifriranje gesla
-            $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
-            
-            // Vstavimo uporabnika v bazo
-            $query = "INSERT INTO Ucenec (ime, priimek, mail, geslo) VALUES (?, ?, ?, ?)";
+            // Preverimo, če uporabnik že obstaja
+            $query = "SELECT * FROM Ucenec WHERE mail = ?";
             $stmt = $link->prepare($query);
-            $stmt->bind_param("ssss", $firstname, $lastname, $email, $hashedPassword);
+            $stmt->bind_param("s", $email);
+            $stmt->execute();
+            $result = $stmt->get_result();
 
-            if ($stmt->execute()) {
-                // Nastavimo sejo uporabnika
-                $_SESSION['user_id'] = $stmt->insert_id;
-                $_SESSION['user_name'] = $firstname . ' ' . $lastname;
-                $_SESSION['logged_in'] = true;
-                
-                // Preusmerimo uporabnika na stran Ucenci.php
-                header("Location: Spletna uclinica - Ucenci.php");
-                exit();
+            if ($result->num_rows > 0) {
+                echo "Uporabnik s tem e-poštnim naslovom že obstaja.";
             } else {
-                echo "Napaka pri registraciji: " . $stmt->error;
+                // Šifriranje gesla
+                $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
+
+                // Vstavimo uporabnika v bazo
+                $query = "INSERT INTO Ucenec (ime, priimek, mail, id_razreda, geslo) VALUES (?, ?, ?, ?, ?)";
+                $stmt = $link->prepare($query);
+                $stmt->bind_param("sssss", $firstname, $lastname, $email, $id_razreda, $hashedPassword);
+
+                if ($stmt->execute()) {
+                    // Nastavimo sejo uporabnika
+                    $_SESSION['user_id'] = $stmt->insert_id;
+                    $_SESSION['user_name'] = $firstname . ' ' . $lastname;
+                    $_SESSION['logged_in'] = true;
+
+                    // Preusmerimo uporabnika na stran Ucenci.php
+                    header("Location: Spletna uclinica - Ucenci.php");
+                    exit();
+                } else {
+                    echo "Napaka pri registraciji: " . $stmt->error;
+                }
             }
         }
 
+        // Zapremo povezavo
         $stmt->close();
         $link->close();
     } else {
@@ -53,6 +66,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     }
 }
 ?>
+
 
 
 
