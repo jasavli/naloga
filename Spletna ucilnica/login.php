@@ -1,5 +1,6 @@
 <?php
 session_start();
+$error_message = '';
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     if (!empty($_POST['email']) && !empty($_POST['password'])) {
@@ -12,7 +13,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             die("Povezava ni uspela: " . $link->connect_error);
         }
 
-        // Pridobimo geslo iz baze glede na e-pošto
+        // Preverimo, ali e-pošta obstaja
         $query = "SELECT id_ucenca, ime, priimek, geslo FROM Ucenec WHERE mail = ?";
         $stmt = $link->prepare($query);
         $stmt->bind_param("s", $email);
@@ -21,29 +22,33 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $stmt->fetch();
 
         if ($id) {
+            // Preverimo geslo
             if (password_verify($password, $hashedPassword)) {
-                // Nastavimo sejo uporabnika
+                // Nastavimo sejo
                 $_SESSION['user_id'] = $id;
                 $_SESSION['user_name'] = $ime . ' ' . $priimek;
                 $_SESSION['logged_in'] = true;
-                
-                // Preusmerimo uporabnika na stran Ucenci.php
+
+                // Preusmerimo na stran za učence
                 header("Location: Spletna uclinica - Ucenci.php");
                 exit();
             } else {
-                echo "Napačno geslo.";
+                // Napačno geslo
+                $error_message = "Napačno geslo.";
             }
         } else {
-            echo "Uporabnik s to e-pošto ne obstaja.";
+            // Uporabnik ne obstaja
+            $error_message = "Uporabnik s tem e-poštnim naslovom ne obstaja.";
         }
 
         $stmt->close();
         $link->close();
     } else {
-        echo "Prosimo, izpolnite vsa polja.";
+        $error_message = "Prosimo, izpolnite vsa polja.";
     }
 }
 ?>
+
 
 <!DOCTYPE html>
 <html lang="en">
@@ -58,8 +63,16 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     </style>
 </head>
 <body>
+    
 <div class="form-container">
     <h2 class="form-title">Prijava</h2>
+
+    <?php if (!empty($error_message)): ?>
+            <div class="error-message">
+                <?php echo $error_message; ?>
+            </div>
+        <?php endif; ?>
+        
     <form action="login.php" method="POST">
         <label class="form-label" for="email">E-poštni naslov</label>
         <input type="email" id="email" name="email" class="form-input" required>

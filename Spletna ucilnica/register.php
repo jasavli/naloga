@@ -1,5 +1,6 @@
 <?php
 session_start();
+$error_message = '';
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     if (!empty($_POST['firstname']) && !empty($_POST['lastname']) && !empty($_POST['email']) && !empty($_POST['password']) && !empty($_POST['id_razreda'])) {
@@ -23,7 +24,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $result = $stmt->get_result();
 
         if ($result->num_rows == 0) {
-            echo "Razred z ID-jem $id_razreda ne obstaja.";
+            $error_message = "Razred z oznako $id_razreda ne obstaja.";
         } else {
             // Preverimo, če uporabnik že obstaja
             $query = "SELECT * FROM Ucenec WHERE mail = ?";
@@ -33,7 +34,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $result = $stmt->get_result();
 
             if ($result->num_rows > 0) {
-                echo "Uporabnik s tem e-poštnim naslovom že obstaja.";
+                $error_message = "Uporabnik s tem e-poštnim naslovom že obstaja.";
             } else {
                 // Šifriranje gesla
                 $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
@@ -53,19 +54,19 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                     header("Location: Spletna uclinica - Ucenci.php");
                     exit();
                 } else {
-                    echo "Napaka pri registraciji: " . $stmt->error;
+                    $error_message = "Napaka pri registraciji: " . $stmt->error;
                 }
             }
         }
 
-        // Zapremo povezavo
         $stmt->close();
         $link->close();
     } else {
-        echo "Prosimo, izpolnite vsa polja.";
+        $error_message = "Prosimo, izpolnite vsa polja.";
     }
 }
 ?>
+
 
 
 
@@ -85,6 +86,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 <body>
 <div class="form-container">
     <h2 class="form-title">Registracija</h2>
+    <?php if (!empty($error_message)): ?>
+            <div class="error-message">
+                <?php echo $error_message; ?>
+            </div>
+        <?php endif; ?>
     <form action="register.php" method="POST">
         <label class="form-label" for="firstname">Ime</label>
         <input type="text" id="firstname" name="firstname" class="form-input" required>
