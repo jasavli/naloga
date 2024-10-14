@@ -2,19 +2,23 @@
 session_start(); // Začnemo sejo
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    if (!empty($_POST['firstname']) && !empty($_POST['lastname']) && !empty($_POST['email']) && !empty($_POST['password'])) {
+    if (!empty($_POST['firstname']) && !empty($_POST['lastname']) && !empty($_POST['email']) && !empty($_POST['password']) && !empty($_POST['emso']) && !empty($_POST['tel']) && !empty($_POST['id_razreda'])) {
         $firstname = $_POST['firstname'];
         $lastname = $_POST['lastname'];
         $email = $_POST['email'];
         $password = $_POST['password'];
+        $emso = $_POST['emso'];
+        $tel = $_POST['tel'];
+        $id_razreda = $_POST['id_razreda'];
         
+        // Povezava s podatkovno bazo
         $link = new mysqli("localhost", "root", "", "SpletnaUcilnica");
 
         if ($link->connect_error) {
             die("Povezava ni uspela: " . $link->connect_error);
         }
 
-        // Preverimo, če uporabnik že obstaja
+        // Preverimo, če učenec s tem e-poštnim naslovom že obstaja
         $query = "SELECT * FROM Ucenec WHERE mail = ?";
         $stmt = $link->prepare($query);
         $stmt->bind_param("s", $email);
@@ -24,11 +28,13 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         if ($result->num_rows > 0) {
             echo "Uporabnik s tem e-poštnim naslovom že obstaja.";
         } else {
+            // Šifriranje gesla
             $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
             
-            $query = "INSERT INTO Ucenec (ime, priimek, mail, geslo) VALUES (?, ?, ?, ?)";
+            // Vstavimo učenca v bazo
+            $query = "INSERT INTO Ucenec (ime, priimek, mail, tel_st, emso, id_razreda, geslo) VALUES (?, ?, ?, ?, ?, ?, ?)";
             $stmt = $link->prepare($query);
-            $stmt->bind_param("ssss", $firstname, $lastname, $email, $hashedPassword);
+            $stmt->bind_param("sssssss", $firstname, $lastname, $email, $tel, $emso, $id_razreda, $hashedPassword);
 
             if ($stmt->execute()) {
                 // Prijavimo uporabnika in nastavimo sejo
@@ -36,13 +42,14 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 $_SESSION['logged_in'] = true;
                 
                 // Preusmerimo na začetno stran
-                header("Location: Spletna uclinica - Ucenci.php");
+                header("Location: index.php");
                 exit();
             } else {
                 echo "Napaka pri registraciji: " . $stmt->error;
             }
         }
 
+        // Zapremo povezavo
         $stmt->close();
         $link->close();
     } else {
@@ -52,13 +59,14 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 ?>
 
 
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel='stylesheet' type='text/css' media='screen' href='main.css'>
+    <link rel='stylesheet' type='text/css' media='screen' href='Spletna ucilnica CSS.css'>
     <script src='main.js'></script>
     <title>Spletna ucilnica - Prijava</title>
 </head>
@@ -75,6 +83,15 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         <label class="form-label" for="email">E-poštni naslov</label>
         <input type="email" id="email" name="email" class="form-input" required>
 
+        <label class="form-label" for="tel">Telefonska številka</label>
+        <input type="text" id="tel" name="tel" class="form-input" required>
+
+        <label class="form-label" for="emso">EMŠO</label>
+        <input type="text" id="emso" name="emso" class="form-input" required>
+
+        <label class="form-label" for="id_razreda">Razred</label>
+        <input type="text" id="id_razreda" name="id_razreda" class="form-input" required>
+
         <label class="form-label" for="password">Geslo</label>
         <input type="password" id="password" name="password" class="form-input" required>
 
@@ -82,6 +99,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     </form>
     <p class="form-link"><a href="login.php">Že imate račun? Prijavite se tukaj.</a></p>
 </div>
+
 
 
 <?php
