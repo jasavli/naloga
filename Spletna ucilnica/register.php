@@ -1,24 +1,20 @@
 <?php
-session_start(); // Začnemo sejo
+session_start();
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    if (!empty($_POST['firstname']) && !empty($_POST['lastname']) && !empty($_POST['email']) && !empty($_POST['password']) && !empty($_POST['emso']) && !empty($_POST['tel']) && !empty($_POST['id_razreda'])) {
+    if (!empty($_POST['firstname']) && !empty($_POST['lastname']) && !empty($_POST['email']) && !empty($_POST['password'])) {
         $firstname = $_POST['firstname'];
         $lastname = $_POST['lastname'];
         $email = $_POST['email'];
         $password = $_POST['password'];
-        $emso = $_POST['emso'];
-        $tel = $_POST['tel'];
-        $id_razreda = $_POST['id_razreda'];
         
-        // Povezava s podatkovno bazo
         $link = new mysqli("localhost", "root", "", "SpletnaUcilnica");
 
         if ($link->connect_error) {
             die("Povezava ni uspela: " . $link->connect_error);
         }
 
-        // Preverimo, če učenec s tem e-poštnim naslovom že obstaja
+        // Preverimo, če uporabnik že obstaja
         $query = "SELECT * FROM Ucenec WHERE mail = ?";
         $stmt = $link->prepare($query);
         $stmt->bind_param("s", $email);
@@ -31,25 +27,25 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             // Šifriranje gesla
             $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
             
-            // Vstavimo učenca v bazo
-            $query = "INSERT INTO Ucenec (ime, priimek, mail, tel_st, emso, id_razreda, geslo) VALUES (?, ?, ?, ?, ?, ?, ?)";
+            // Vstavimo uporabnika v bazo
+            $query = "INSERT INTO Ucenec (ime, priimek, mail, geslo) VALUES (?, ?, ?, ?)";
             $stmt = $link->prepare($query);
-            $stmt->bind_param("sssssss", $firstname, $lastname, $email, $tel, $emso, $id_razreda, $hashedPassword);
+            $stmt->bind_param("ssss", $firstname, $lastname, $email, $hashedPassword);
 
             if ($stmt->execute()) {
-                // Prijavimo uporabnika in nastavimo sejo
-                $_SESSION['user_id'] = $stmt->insert_id; // ID novega uporabnika
+                // Nastavimo sejo uporabnika
+                $_SESSION['user_id'] = $stmt->insert_id;
+                $_SESSION['user_name'] = $firstname . ' ' . $lastname;
                 $_SESSION['logged_in'] = true;
                 
-                // Preusmerimo na začetno stran
-                header("Location: index.php");
+                // Preusmerimo uporabnika na stran Ucenci.php
+                header("Location: Spletna uclinica - Ucenci.php");
                 exit();
             } else {
                 echo "Napaka pri registraciji: " . $stmt->error;
             }
         }
 
-        // Zapremo povezavo
         $stmt->close();
         $link->close();
     } else {
@@ -57,6 +53,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     }
 }
 ?>
+
+
 
 
 

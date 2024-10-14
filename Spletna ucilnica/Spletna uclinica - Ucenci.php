@@ -1,3 +1,12 @@
+<?php
+session_start();
+if (!isset($_SESSION['logged_in'])) {
+    // Če uporabnik ni prijavljen, ga preusmerimo na prijavno stran
+    header("Location: login.php");
+    exit();
+}
+?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -17,31 +26,36 @@
         </ul>
 </header>
 
-    <div class="outerDiv">
-        <div class="navigationDiv">
-            <ul id="navigationList">
-                <li style="background-color:grey;">PREDMETI</li>
-                <li onclick = "OpenNew()">ZA PREGLED</li>
-            </ul>
-        </div>
-        
-        <script>
-            function OpenNew(){
-                window.open("Spletna%20uclinica%20-%20Ucenci%20-%202.php", "_self");
-            }
-
-
-        </script>
-        <div class="optionGrid">
-            <div class="gridItem"></div>
-            <div class="gridItem"></div>
-            <div class="gridItem"></div>
-            <div class="gridItem"></div>
-            <div class="gridItem"></div>
-            <div class="gridItem"></div>
-            <div class="gridItem"></div>
-            <div class="gridItem"></div>
-        </div>
+<div class="outerDiv">
+    <div class="navigationDiv">
+        <ul id="navigationList">
+            <li style="background-color:grey;">PREDMETI</li>
+            <li onclick = "OpenNew()">ZA PREGLED</li>
+        </ul>
     </div>
+
+    <div class="optionGrid">
+        <div class="gridItem"></div>
+        <div class="gridItem"></div>
+        <div class="gridItem"></div>
+        <div class="gridItem"></div>
+        <div class="gridItem"></div>
+        <div class="gridItem"></div>
+        <div class="gridItem"></div>
+        <div class="gridItem"></div>
+    </div>
+</div>
+
+<!-- Prikaz prijavljenega uporabnika -->
+<div class="user-info">
+    <p>Prijavljeni ste kot: <?php echo $_SESSION['user_name']; ?></p>
+    <a href="logout.php">Odjava</a> <!-- Odjava uporabnika -->
+</div>
+
+<script>
+    function OpenNew(){
+        window.open("Spletna%20uclinica%20-%20Ucenci%20-%202.php", "_self");
+    }
+</script>
 </body>
 </html>
