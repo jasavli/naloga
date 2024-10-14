@@ -154,3 +154,25 @@ CREATE TABLE OddaneNaloge
 );
 
 */
+
+/*CREATE TABLE UcenecPredmet
+(
+  id_ucenca  int NOT NULL,
+  id_predmeta int NOT NULL,
+  PRIMARY KEY (id_ucenca, id_predmeta),
+  FOREIGN KEY (id_ucenca) REFERENCES Ucenec(id_ucenca),
+  FOREIGN KEY (id_predmeta) REFERENCES Predmet(id_predmeta)
+);
+
+CREATE TABLE ZgodovinaOddaj
+(
+  id_zgodovine int NOT NULL PRIMARY KEY AUTO_INCREMENT,
+  id_naloge    int NOT NULL,
+  datum_oddaje datetime NOT NULL,
+  komentarji   varchar(500) NULL,
+  FOREIGN KEY (id_naloge) REFERENCES OddaneNaloge(id_naloge)
+);
+
+ALTER TABLE OddaneNaloge ADD status varchar(20) DEFAULT 'V obdelavi';
+
+*/
