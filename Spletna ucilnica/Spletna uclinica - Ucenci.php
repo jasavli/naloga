@@ -16,28 +16,6 @@ if (!isset($_SESSION['logged_in'])) {
     <title>Spletna učilnica</title>
     <link rel='stylesheet' type='text/css' media='screen' href='Spletna ucilnica CSS.css'>
     <script src='main.js'></script>
-    <style>
-        /* Stil za prikaz imena uporabnika in gumb za odjavo */
-        .user-info {
-            position: absolute;
-            top: 10px;
-            right: 20px;
-            font-size: 18px;
-        }
-
-        .user-info a {
-            margin-left: 10px;
-            background-color: #f44336;
-            color: white;
-            padding: 5px 10px;
-            border-radius: 5px;
-            text-decoration: none;
-        }
-
-        .user-info a:hover {
-            background-color: #d32f2f;
-        }
-    </style>
 </head>
 <body>
 <header>
@@ -75,7 +53,8 @@ if (!isset($_SESSION['logged_in'])) {
 
 <script>
     function OpenNew(){
-        window.open("Spletna%20uclinica%20-%20Ucenci%20-%202.php", "_self");
+        // Odpri stran za pregled nalog (naloge za pregled iz prejšnje kode)
+        window.open("Spletna uclinica - Ucenci - 3.php", "_self");
     }
 </script>
 </body>
