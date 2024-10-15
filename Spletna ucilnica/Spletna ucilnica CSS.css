@@ -340,4 +340,53 @@ input[type="submit"]:hover {
     width: 50%;
     margin: 10px auto;
 }
+.zaPregledContent {
+    width: 75%;
+    margin-left: 2%;
+    padding: 20px;
+    background-color: rgb(208, 248, 252);
+    border-radius: 8px;
+}
+
+h2 {
+    font-family: 'Lucida Sans', Geneva, Verdana, sans-serif;
+    font-size: 28px;
+    color: #333;
+}
+
+/* List styling */
+.subjectsList, .assignmentList {
+    list-style-type: none;
+    padding: 0;
+    margin-bottom: 20px;
+}
+
+.assignmentItem, .subjectsList li {
+    background-color: #59C5FF;
+    margin: 10px 0;
+    padding: 15px;
+    font-size: 20px;
+    color: white;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+.assignmentItem:hover, .subjectsList li:hover {
+    background-color: #74EEF4;
+}
+
+/* Task Details Styling */
+.assignmentDetails {
+    background-color: #f0f0f0;
+    color: #333;
+    font-size: 18px;
+    padding: 10px;
+    border-radius: 4px;
+    display: none;  /* Hidden by default */
+    margin-top: 10px;
+}
+
+.assignmentDetails.open {
+    display: block;  /* Displayed when expanded */
+}
 
