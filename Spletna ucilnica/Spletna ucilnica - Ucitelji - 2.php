@@ -39,14 +39,22 @@ $teacher_id = 1;  // Replace with the actual teacher ID
 <div class="outerDiv">
     <div class="navigationDiv">
         <ul id="navigationList">
-            <li onclick="SelectedItem(this)" style="background-color:grey;">ZA PREGLED</li>
-            <li onclick="SelectedItem(this)">PREDMETI</li>
-            <li onclick="SelectedItem(this)">NASTAVITVE</li>
+            <li onclick="Redirect()">ZA PREGLED</li>
+            <li style="background-color:grey;">PREDMETI</li>
+            <li onclick="Redirect()">NASTAVITVE</li>
         </ul>
     </div>
 
     <script>
-        var selectedItemText = "UČITELJI";
+        function Redirect(){
+            window.open("Spletna ucilnica - Ucitelji.php", "_self");
+        }
+
+
+
+
+
+        var selectedItemText = "PREDMETI";
         function SelectedItem(element){
             UnselectElements(element);
             if(element.innerText !== selectedItemText){

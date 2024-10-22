@@ -35,13 +35,19 @@ if ($conn->connect_error) {
     <div class="outerDiv">
         <div class="navigationDiv">
             <ul id="navigationList">
-                <li onclick="SelectedItem(this)" style="background-color:grey;">ZA PREGLED</li>
-                <li onclick="SelectedItem(this)">PREDMETI</li>
-                <li onclick="SelectedItem(this)">NASTAVITVE</li>
+                <li style="background-color:grey;">ZA PREGLED</li>
+                <li onclick="Redirect()">PREDMETI</li>
+                <li onclick="Redirect()">NASTAVITVE</li>
             </ul>
         </div>
         
         <script>
+ function Redirect(){
+            window.open("Spletna ucilnica - Ucitelji - 2.php", "_self");
+        }
+
+
+
             var selectedItemText = "UČITELJI";
             function SelectedItem(element){
                 UnselectElements(element);
