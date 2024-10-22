@@ -13,32 +13,46 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             die("Povezava ni uspela: " . $link->connect_error);
         }
 
-        // Preverimo, ali e-pošta obstaja
-        $query = "SELECT id_ucenca, ime, priimek, geslo FROM Ucenec WHERE mail = ?";
+        // Preveri, ali gre za učenca ali učitelja
+        $query = "SELECT id_ucenca, ime, priimek, geslo, 'ucenec' AS tip FROM Ucenec WHERE mail = ?
+                  UNION
+                  SELECT id_ucitelja, ime, priimek, geslo, 'ucitelj' AS tip FROM Ucitelj WHERE mail = ?";
         $stmt = $link->prepare($query);
-        $stmt->bind_param("s", $email);
+        $stmt->bind_param("ss", $email, $email); // Enak email za oba poizvedka
         $stmt->execute();
-        $stmt->bind_result($id, $ime, $priimek, $hashedPassword);
+        $stmt->bind_result($id, $ime, $priimek, $hashedPassword, $tip);
         $stmt->fetch();
 
-        if ($id) {
+        // Dodajmo debug sporočilo
+        if (!$id) {
+            $error_message = "Uporabnik s tem e-poštnim naslovom ne obstaja.";
+            error_log("Uporabnik ni najden za email: $email"); // Debug
+        } else {
+            if ($tip === 'ucitelj') {
+                error_log("Učitelj je bil najden: $ime $priimek, ID: $id"); // Debug
+            } else {
+                error_log("Učenec je bil najden: $ime $priimek, ID: $id"); // Debug
+            }
+
             // Preverimo geslo
             if (password_verify($password, $hashedPassword)) {
                 // Nastavimo sejo
                 $_SESSION['user_id'] = $id;
                 $_SESSION['user_name'] = $ime . ' ' . $priimek;
+                $_SESSION['user_type'] = $tip;
                 $_SESSION['logged_in'] = true;
 
-                // Preusmerimo na stran za učence
-                header("Location: Spletna uclinica - Ucenci.php");
+                // Preusmeritev glede na tip uporabnika
+                if ($tip === 'ucenec') {
+                    header("Location: Spletna uclinica - Ucenci.php");
+                } else if ($tip === 'ucitelj') {
+                    header("Location: Spletna uclinica - Ucitelji.php");
+                }
                 exit();
             } else {
-                // Napačno geslo
                 $error_message = "Napačno geslo.";
+                error_log("Napačno geslo za uporabnika: $email"); // Debug
             }
-        } else {
-            // Uporabnik ne obstaja
-            $error_message = "Uporabnik s tem e-poštnim naslovom ne obstaja.";
         }
 
         $stmt->close();
@@ -50,6 +64,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 ?>
 
 
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -59,8 +74,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     <link rel='stylesheet' type='text/css' media='screen' href='Spletna ucilnica CSS.css'>
     <script src='main.js'></script>
     <title>Spletna ucilnica - Prijava</title>
-    <style>
-    </style>
 </head>
 <body>
     
@@ -71,7 +84,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             <div class="error-message">
                 <?php echo $error_message; ?>
             </div>
-        <?php endif; ?>
+    <?php endif; ?>
         
     <form action="login.php" method="POST">
         <label class="form-label" for="email">E-poštni naslov</label>
