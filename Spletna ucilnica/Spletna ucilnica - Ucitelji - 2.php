@@ -164,7 +164,6 @@ if ($_SERVER['add_task.php'] === 'POST') {
 
     if ($conn->query($sql) === TRUE) {
         echo "Nova naloga je bila uspešno dodana.";
-        header("Location: subject_tasks.php?subject_id=$subject_id"); // Redirect back to subject tasks
         exit();
     } else {
         echo "Napaka: " . $sql . "<br>" . $conn->error;
