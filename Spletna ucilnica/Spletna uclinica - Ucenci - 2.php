@@ -13,9 +13,9 @@ if ($link->connect_error) {
     die("Povezava ni uspela: " . $link->connect_error);
 }
 
-// Pridobimo gradiva za pregled, kjer je prijavljen uporabnik učitelj
+// Pridobimo gradiva za pregled, kjer je prijavljen uporabnik učitelj, vključno z datotekami
 $id_ucitelja = $_SESSION['user_id'];
-$query = "SELECT naslov_gradiva, navodilo, rok_oddaje FROM Gradiva WHERE id_ucitelja = ?";
+$query = "SELECT naslov_gradiva, navodilo, datoteke, rok_oddaje FROM gradiva WHERE id_ucitelja = ?";
 $stmt = $link->prepare($query);
 $stmt->bind_param("i", $id_ucitelja);
 $stmt->execute();
@@ -31,6 +31,7 @@ if ($result->num_rows > 0) {
 $stmt->close();
 $link->close();
 ?>
+
 
 <!DOCTYPE html>
 <html lang="en">
