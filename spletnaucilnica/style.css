@@ -1,0 +1,282 @@
+/* style.css */
+
+/* Osnovni slogi */
+body {
+    margin: 0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f9f9f9;
+    color: #333;
+}
+
+h2 {
+    margin: 0;
+    padding: 20px;
+}
+
+/* Zgornja naslovna vrstica */
+.header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background-color: #badfe9; /* Nova barva headerja */
+    color: #333;
+    padding: 10px 20px;
+}
+
+.header .logo {
+    display: flex;
+    align-items: center;
+}
+
+.header .logo img {
+    height: 100px;
+    width: auto;
+    margin-right: 10px;
+}
+
+.header .logo h2 {
+    font-size: 24px;
+    font-weight: normal;
+}
+
+.header .logout {
+    text-decoration: none;
+    color: #333;
+    font-weight: bold;
+}
+
+.header .logout:hover {
+    text-decoration: underline;
+}
+
+/* Glavni vsebinski del */
+.main-content {
+    display: flex;
+    height: calc(100vh - 60px); /* Višina okna minus višina naslovne vrstice */
+}
+
+/* Levi stranski meni */
+.sidebar {
+    width: 200px;
+    background-color: #fff;
+    border-right: 1px solid #ddd;
+    padding-top: 20px;
+}
+
+.sidebar ul {
+    list-style-type: none;
+    padding: 0;
+}
+
+.sidebar ul li {
+    padding: 10px 20px;
+}
+
+.sidebar ul li a {
+    text-decoration: none;
+    color: #333;
+    display: block;
+}
+
+.sidebar ul li a:hover, .sidebar ul li a.active {
+    background-color: #badfe9;
+    color: #000;
+}
+
+.sidebar ul li a.active {
+    font-weight: bold;
+}
+
+
+/* Vsebina */
+.content {
+    flex-grow: 1;
+    padding: 20px;
+    overflow-y: auto;
+}
+
+.content h3 {
+    margin-top: 0;
+}
+
+.content h4 {
+    margin-top: 20px;
+    color: #333;
+}
+
+/* Predmeti */
+.subjects-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 20px;
+}
+
+.subject-card {
+    background-color: #e6f7fa;
+    padding: 15px;
+    border-radius: 5px;
+    text-align: center;
+    border: 1px solid #badfe9;
+}
+
+.subject-card h4 {
+    margin: 10px 0;
+    color: #333;
+}
+
+.subject-card a {
+    text-decoration: none;
+    color: #007acc;
+    font-weight: bold;
+}
+
+.subject-card a:hover {
+    text-decoration: underline;
+}
+
+/* Gumbi */
+button {
+    background-color: #007acc;
+    color: #fff;
+    border: none;
+    padding: 10px 15px;
+    cursor: pointer;
+    border-radius: 5px;
+}
+
+button:hover {
+    background-color: #005f99;
+}
+
+input[type="text"],
+input[type="password"],
+input[type="email"],
+select,
+textarea {
+    width: 100%;
+    padding: 8px;
+    box-sizing: border-box;
+    margin-top: 5px;
+    margin-bottom: 15px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+/* Tabele */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+
+table th, table td {
+    padding: 12px;
+    border: 1px solid #ddd;
+}
+
+table th {
+    background-color: #badfe9;
+    color: #333;
+}
+
+/* Zavihki */
+.tabs {
+    overflow: hidden;
+    background-color: #f1f1f1;
+    margin-top: 20px;
+}
+
+.tabs button {
+    background-color: inherit;
+    float: left;
+    border: none;
+    outline: none;
+    cursor: pointer;
+    padding: 14px 16px;
+    transition: 0.3s;
+    font-size: 17px;
+}
+
+.tabs button:hover {
+    background-color: #ddd;
+}
+
+.tabs button.active {
+    background-color: #badfe9;
+}
+
+.tabcontent {
+    display: none;
+    padding: 20px 0;
+}
+
+/* Odzivnost */
+@media (max-width: 768px) {
+    .sidebar {
+        width: 150px;
+    }
+}
+
+@media (max-width: 576px) {
+    .main-content {
+        flex-direction: column;
+    }
+    .sidebar {
+        width: 100%;
+        height: auto;
+    }
+    .content {
+        height: auto;
+    }
+}
+
+/* Dodajte naslednje stile v vaš style.css */
+
+/* Centered container */
+.centered-container {
+    max-width: 400px;
+    margin: 0 auto;
+    padding: 40px 20px;
+    text-align: center;
+}
+
+/* Form container */
+.form-container {
+    text-align: left;
+}
+
+.form-container label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+}
+
+.form-container input[type="text"],
+.form-container input[type="password"],
+.form-container input[type="email"],
+.form-container select {
+    width: 100%;
+    padding: 8px;
+    margin-bottom: 15px;
+    box-sizing: border-box;
+}
+
+.form-container button {
+    width: 100%;
+    padding: 10px;
+    background-color: #007acc;
+    color: #fff;
+    border: none;
+    cursor: pointer;
+    border-radius: 5px;
+}
+
+.form-container button:hover {
+    background-color: #005f99;
+}
+
+/* Posodobitev headerja za povezavo */
+.header .logo a {
+    text-decoration: none;
+    color: inherit;
+}
