@@ -3,7 +3,7 @@
 <head>
     <meta charset='utf-8'>
     <meta http-equiv='X-UA-Compatible' content='IE=edge'>
-    <title>Spletna učilnica</title>
+    <title>Spletna učilnica - Učenci</title>
     <meta name='viewport' content='width=device-width, initial-scale=1'>
     <link rel='stylesheet' type='text/css' media='screen' href='Spletna ucilnica CSS.css'>
 </head>
@@ -31,23 +31,23 @@
         }
 </script>
 <div class="outerDiv">
-    <div class="navigationDiv">
+<div class="navigationDiv">
         <ul id="navigationList">
-            <li onclick="Redirect()" style="background-color:grey;">UČITELJI</li>
-            <li onclick="Redirect1()">UČENCI</li>
+            <li onclick="Redirect()" >UČITELJI</li>
+            <li onclick="Redirect1()" style="background-color:grey;">UČENCI</li>
             <li onclick="Redirect3()">PREDMETI</li>
             <li onclick="Redirect2()">RAZREDI</li>
         </ul>
     </div>
     
-    <div id="teacherGrid" class="optionGrid">
-        <!-- Teacher names will be dynamically populated here -->
+    <div id="studentGrid" class="optionGrid">
+        <!-- Student names will be dynamically populated here -->
     </div>
 </div>
 
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        const teachers = <?php
+        const students = <?php
             $servername = "localhost";
             $username = "root";
             $password = "";
@@ -61,14 +61,14 @@
                 die("Connection failed: " . $conn->connect_error);
             }
 
-            // Fetch teacher names
-            $sql = "SELECT ime, priimek FROM ucitelj ORDER BY ime, priimek";
+            // Fetch student names
+            $sql = "SELECT ime, priimek FROM ucenec ORDER BY ime, priimek";
             $result = $conn->query($sql);
 
-            $teachers = array();
+            $students = array();
             if ($result->num_rows > 0) {
                 while($row = $result->fetch_assoc()) {
-                    $teachers[] = $row['ime'] . ' ' . $row['priimek'];
+                    $students[] = $row['ime'] . ' ' . $row['priimek'];
                 }
             }
 
@@ -76,34 +76,19 @@
             $conn->close();
 
             // Convert PHP array to JSON for JavaScript
-            echo json_encode($teachers);
+            echo json_encode($students);
         ?>;
 
-        const grid = document.getElementById('teacherGrid');
-        teachers.forEach(teacher => {
+        const grid = document.getElementById('studentGrid');
+        grid.innerHTML = ''; // Clear existing grid items
+
+        students.forEach(student => {
             const gridItem = document.createElement('div');
             gridItem.className = 'gridItem';
-            gridItem.textContent = teacher;
+            gridItem.textContent = student;
             grid.appendChild(gridItem);
         });
     });
-
-    function SelectedItem(element){
-        UnselectElements(element);
-        if(element.innerText !== selectedItemText){
-            selectedItemText = element.innerText;
-            element.style.backgroundColor = "grey";
-        }
-    }
-
-    function UnselectElements(selectedElement){
-        const nav = document.getElementById("navigationList").children;
-        for (let child of nav) {
-            if (child !== selectedElement) {
-                child.style.backgroundColor = "lightgrey";
-            }
-        }
-    }
 </script>
 
 </body>

@@ -53,8 +53,16 @@ body,html{
     column-gap: 1%;
     row-gap: 2%;
 }
+.optionGrid > 
 .gridItem{
     background-color: rgb(89, 197, 255);
+    font-size: 20px;       
+    font-weight: bold;     
+    text-align: center;    
+    padding: 20px;         
+    margin: 5px;
+    background-color: #f0f0f0; 
+    border-radius: 8px;  
 }
 .gridItem:hover{
     background-color:rgb(116, 238, 252);
