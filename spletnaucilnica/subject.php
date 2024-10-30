@@ -13,17 +13,26 @@ $user_id = $_SESSION['user_id'];
 $predmet_id = intval($_GET['id']);
 
 // Preverimo, ali ima uporabnik dostop do tega predmeta
+$has_access = false;
 if ($vloga == 'učitelj') {
     $stmt = $conn->prepare("SELECT * FROM ucitelji_predmeti_razredi WHERE ID_ucitelja = ? AND ID_predmeta = ?");
     $stmt->bind_param("ii", $user_id, $predmet_id);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    if ($result->num_rows > 0) {
+        $has_access = true;
+    }
 } elseif ($vloga == 'učenec') {
-    $stmt = $conn->prepare("SELECT * FROM predmeti_razredi pr INNER JOIN ucenci_razredi ur ON pr.ID_razreda = ur.ID_razreda WHERE ur.ID_ucenca = ? AND pr.ID_predmeta = ?");
+    $stmt = $conn->prepare("SELECT * FROM ucenci_predmeti WHERE ID_ucenca = ? AND ID_predmeta = ?");
     $stmt->bind_param("ii", $user_id, $predmet_id);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    if ($result->num_rows > 0) {
+        $has_access = true;
+    }
 }
-$stmt->execute();
-$result = $stmt->get_result();
 
-if ($result->num_rows == 0) {
+if (!$has_access) {
     // Uporabnik nima dostopa do tega predmeta
     header("Location: dashboard.php");
     exit();
@@ -34,6 +43,52 @@ $stmt = $conn->prepare("SELECT * FROM predmeti WHERE ID_predmeta = ?");
 $stmt->bind_param("i", $predmet_id);
 $stmt->execute();
 $predmet = $stmt->get_result()->fetch_assoc();
+
+// Obdelava nalaganja gradiva (če je učitelj)
+if ($vloga == 'učitelj' && isset($_POST['upload_material'])) {
+    $naslov_gradiva = $conn->real_escape_string($_POST['naslov_gradiva']);
+    $opis_gradiva = $conn->real_escape_string($_POST['opis_gradiva']);
+    $datoteka_gradiva = $_FILES['datoteka_gradiva']['name'];
+    $target_dir = "uploads/materials/";
+
+    // Preverimo in ustvarimo mapo, če ne obstaja
+    if (!file_exists($target_dir)) {
+        mkdir($target_dir, 0777, true);
+    }
+
+    $target_file = $target_dir . basename($datoteka_gradiva);
+
+    if (move_uploaded_file($_FILES['datoteka_gradiva']['tmp_name'], $target_file)) {
+        // Vstavimo gradivo v bazo
+        $stmt = $conn->prepare("INSERT INTO gradiva (ID_predmeta, naslov_gradiva, opis, pot_do_datoteke) VALUES (?, ?, ?, ?)");
+        $stmt->bind_param("isss", $predmet_id, $naslov_gradiva, $opis_gradiva, $target_file);
+
+        if ($stmt->execute()) {
+            $success_material = "Gradivo je bilo uspešno naloženo.";
+        } else {
+            $error_material = "Napaka pri shranjevanju gradiva v bazo: " . $conn->error;
+        }
+    } else {
+        $error_material = "Napaka pri nalaganju datoteke.";
+    }
+}
+
+// Obdelava dodajanja nove naloge (če je učitelj)
+if ($vloga == 'učitelj' && isset($_POST['add_assignment'])) {
+    $naslov_naloge = $conn->real_escape_string($_POST['naslov_naloge']);
+    $opis_naloge = $conn->real_escape_string($_POST['opis_naloge']);
+    $rok_oddaje = $conn->real_escape_string($_POST['rok_oddaje']);
+
+    // Vstavimo novo nalogo v bazo
+    $stmt = $conn->prepare("INSERT INTO naloge_predmet (ID_predmeta, naslov_naloge, opis, rok_oddaje) VALUES (?, ?, ?, ?)");
+    $stmt->bind_param("isss", $predmet_id, $naslov_naloge, $opis_naloge, $rok_oddaje);
+
+    if ($stmt->execute()) {
+        $success_assignment = "Naloga je bila uspešno dodana.";
+    } else {
+        $error_assignment = "Napaka pri shranjevanju naloge v bazo: " . $conn->error;
+    }
+}
 ?>
 <!DOCTYPE html>
 <html lang="sl">
@@ -43,6 +98,33 @@ $predmet = $stmt->get_result()->fetch_assoc();
     <link rel="stylesheet" href="style.css">
     <style>
         /* Dodatni slogi za zavihke */
+        .tabs {
+            overflow: hidden;
+            background-color: #f1f1f1;
+        }
+
+        .tabs button {
+            background-color: inherit;
+            float: left;
+            border: none;
+            outline: none;
+            cursor: pointer;
+            padding: 14px 16px;
+            transition: 0.3s;
+        }
+
+        .tabs button:hover {
+            background-color: #ddd;
+        }
+
+        .tabs button.active {
+            background-color: #ccc;
+        }
+
+        .tabcontent {
+            display: none;
+            padding: 6px 12px;
+        }
     </style>
 </head>
 <body>
@@ -63,12 +145,14 @@ $predmet = $stmt->get_result()->fetch_assoc();
         <div class="sidebar">
             <ul>
                 <?php if ($vloga == 'učitelj'): ?>
-                    <li><a href="upload_materials.php">Nalaganje gradiv</a></li>
-                    <li><a href="view_submissions.php">Oddane naloge</a></li>
-                <?php elseif ($vloga == 'učenec'): ?>
+                    <li><a href="dashboard.php">Nadzorna plošča</a></li>
                     <li><a href="my_profile.php">Moj profil</a></li>
+                <?php elseif ($vloga == 'učenec'): ?>
+                    <li><a href="dashboard.php">Nadzorna plošča</a></li>
                     <li><a href="my_assignments.php">Moje naloge</a></li>
+                    <li><a href="my_profile.php">Moj profil</a></li>
                 <?php endif; ?>
+                <li><a href="logout.php">Odjava</a></li>
             </ul>
         </div>
 
@@ -108,6 +192,23 @@ $predmet = $stmt->get_result()->fetch_assoc();
                 <?php else: ?>
                     <p>Ni gradiv za ta predmet.</p>
                 <?php endif; ?>
+
+                <?php if ($vloga == 'učitelj'): ?>
+                    <h4>Naloži novo gradivo</h4>
+                    <?php
+                    if (isset($success_material)) echo "<p style='color:green;'>$success_material</p>";
+                    if (isset($error_material)) echo "<p style='color:red;'>$error_material</p>";
+                    ?>
+                    <form action="subject.php?id=<?php echo $predmet_id; ?>" method="post" enctype="multipart/form-data" class="form-container">
+                        <label>Naslov gradiva:</label>
+                        <input type="text" name="naslov_gradiva" required><br>
+                        <label>Opis (neobvezno):</label>
+                        <textarea name="opis_gradiva"></textarea><br>
+                        <label>Izberite datoteko:</label>
+                        <input type="file" name="datoteka_gradiva" required><br>
+                        <button type="submit" name="upload_material">Naloži gradivo</button>
+                    </form>
+                <?php endif; ?>
             </div>
 
             <div id="Naloge" class="tabcontent">
@@ -133,6 +234,23 @@ $predmet = $stmt->get_result()->fetch_assoc();
                     </ul>
                 <?php else: ?>
                     <p>Ni nalog za ta predmet.</p>
+                <?php endif; ?>
+
+                <?php if ($vloga == 'učitelj'): ?>
+                    <h4>Dodaj novo nalogo</h4>
+                    <?php
+                    if (isset($success_assignment)) echo "<p style='color:green;'>$success_assignment</p>";
+                    if (isset($error_assignment)) echo "<p style='color:red;'>$error_assignment</p>";
+                    ?>
+                    <form action="subject.php?id=<?php echo $predmet_id; ?>" method="post" class="form-container">
+                        <label>Naslov naloge:</label>
+                        <input type="text" name="naslov_naloge" required><br>
+                        <label>Opis:</label>
+                        <textarea name="opis_naloge"></textarea><br>
+                        <label>Rok oddaje:</label>
+                        <input type="datetime-local" name="rok_oddaje" required><br>
+                        <button type="submit" name="add_assignment">Dodaj nalogo</button>
+                    </form>
                 <?php endif; ?>
             </div>
         </div>
