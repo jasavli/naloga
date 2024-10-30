@@ -68,15 +68,19 @@ $predmeti = $stmt->get_result();
         <div class="sidebar">
             <ul>
                 <?php if ($vloga == 'administrator'): ?>
+                    <li><a href="dashboard.php">Nadzorna plošča</a></li>
                     <li><a href="manage_subjects.php">Upravljanje predmetov</a></li>
                     <li><a href="manage_teachers.php">Upravljanje učiteljev</a></li>
                     <li><a href="manage_students.php">Upravljanje učencev</a></li>
                 <?php elseif ($vloga == 'učitelj'): ?>
+                    <li><a href="dashboard.php">Nadzorna plošča</a></li>
                     <li><a href="upload_materials.php">Nalaganje gradiv</a></li>
                     <li><a href="view_submissions.php">Oddane naloge</a></li>
                 <?php elseif ($vloga == 'učenec'): ?>
-                    <li><a href="my_profile.php">Moj profil</a></li>
+                    <li><a href="dashboard.php">Nadzorna plošča</a></li>
                     <li><a href="my_assignments.php">Moje naloge</a></li>
+                    <li><a href="my_profile.php">Moj profil</a></li>
+                    
                 <?php endif; ?>
             </ul>
         </div>

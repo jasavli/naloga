@@ -151,7 +151,7 @@ $oddane_naloge = $stmt->get_result();
                             <td><?php echo htmlspecialchars($naloga['ime_predmeta']); ?></td>
                             <td><?php echo htmlspecialchars($naloga['naslov_predmeta_naloge']); ?></td>
                             <td><?php echo date('d.m.Y H:i', strtotime($naloga['datum_oddaje'])); ?></td>
-                            <td><a href="view_assignment.php?id=<?php echo $naloga['ID_naloge']; ?>">Ogled</a></td>
+                            <td><a href="assignment.php?id=<?php echo $naloga['ID_naloge']; ?>">Ogled</a></td>
                         </tr>
                     <?php endwhile; ?>
                 </table>

@@ -119,10 +119,10 @@ $gradiva = $stmt->get_result();
         <!-- Levi stranski meni -->
         <div class="sidebar">
             <ul>
-                <li><a href="my_profile.php" <?php if (basename($_SERVER['PHP_SELF']) == 'my_profile.php') echo 'class="active"'; ?>>Moj profil</a></li>
+                
                 <li><a href="upload_materials.php" <?php if (basename($_SERVER['PHP_SELF']) == 'upload_materials.php') echo 'class="active"'; ?>>Gradiva</a></li>
                 <li><a href="view_submissions.php" <?php if (basename($_SERVER['PHP_SELF']) == 'view_submissions.php') echo 'class="active"'; ?>>Oddane naloge</a></li>
-                <li><a href="logout.php">Odjava</a></li>
+                <li><a href="my_profile.php" <?php if (basename($_SERVER['PHP_SELF']) == 'my_profile.php') echo 'class="active"'; ?>>Moj profil</a></li>
             </ul>
         </div>
 

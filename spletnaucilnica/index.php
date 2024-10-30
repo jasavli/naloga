@@ -3,6 +3,12 @@
 session_start();
 include('config.php');
 
+// Če je uporabnik že prijavljen, ga preusmerimo na nadzorno ploščo
+if (isset($_SESSION['user_id'])) {
+    header("Location: dashboard.php");
+    exit();
+}
+
 if (isset($_POST['login'])) {
     $username = $conn->real_escape_string($_POST['username']);
     $password = $_POST['password'];
@@ -20,6 +26,7 @@ if (isset($_POST['login'])) {
             $_SESSION['user_id'] = $user['ID_uporabnika'];
             $_SESSION['role'] = $user['vloga'];
             header("Location: dashboard.php");
+            exit();
         } else {
             $error = "Napačno uporabniško ime ali geslo.";
         }
@@ -36,15 +43,28 @@ if (isset($_POST['login'])) {
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <h2>Prijava v sistem</h2>
-    <?php if (isset($error)) echo "<p style='color:red;'>$error</p>"; ?>
-    <form action="index.php" method="post">
-        <label>Uporabniško ime:</label>
-        <input type="text" name="username" required><br>
-        <label>Geslo:</label>
-        <input type="password" name="password" required><br>
-        <button type="submit" name="login">Prijava</button>
-    </form>
-    <p>Če še nimate računa, se lahko <a href="register.php">registrirate tukaj</a>.</p>
+    <!-- Zgornja naslovna vrstica -->
+    <div class="header">
+        <div class="logo">
+            <a href="index.php" style="display: flex; align-items: center; text-decoration: none; color: inherit;">
+                <img src="logo.png" alt="Logo">
+                <h2>Moja Šola</h2>
+            </a>
+        </div>
+    </div>
+
+    <!-- Vsebina -->
+    <div class="centered-container">
+        <h2>Prijava v sistem</h2>
+        <?php if (isset($error)) echo "<p style='color:red;'>$error</p>"; ?>
+        <form action="index.php" method="post" class="form-container">
+            <label>Uporabniško ime:</label>
+            <input type="text" name="username" required><br>
+            <label>Geslo:</label>
+            <input type="password" name="password" required><br>
+            <button type="submit" name="login">Prijava</button>
+        </form>
+        <p>Če še nimate računa, se lahko <a href="register.php">registrirate tukaj</a>.</p>
+    </div>
 </body>
 </html>
