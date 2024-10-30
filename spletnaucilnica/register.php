@@ -58,7 +58,7 @@ $result = $conn->query("SELECT ID_razreda, ime_razreda FROM razredi");
     <div class="header">
         <div class="logo">
             <a href="index.php" style="display: flex; align-items: center; text-decoration: none; color: inherit;">
-                <img src="logo.png" alt="Logo">
+                <img src="logo2.png" alt="Logo">
                 <h2>Spletna učilnica</h2>
             </a>
         </div>

@@ -47,8 +47,8 @@ if (isset($_POST['login'])) {
     <div class="header">
         <div class="logo">
             <a href="index.php" style="display: flex; align-items: center; text-decoration: none; color: inherit;">
-                <img src="logo.png" alt="Logo">
-                <h2>Moja Šola</h2>
+                <img src="logo2.png" alt="Logo">
+                <h2>Spletna učilnica</h2>
             </a>
         </div>
     </div>
