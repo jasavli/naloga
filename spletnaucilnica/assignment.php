@@ -43,22 +43,6 @@ if (!$naloga_predmet) {
 $predmet_id = $naloga_predmet['ID_predmeta'];
 $datoteka_naloge = $naloga_predmet['pot_do_datoteke'];
 
-// Preverimo, ali učenec obiskuje predmet preko svojih razredov
-$razredi_placeholders = implode(',', array_fill(0, count($razredi), '?'));
-$sql = "SELECT COUNT(*) as cnt FROM predmeti_razredi WHERE ID_predmeta = ? AND ID_razreda IN ($razredi_placeholders)";
-$stmt = $conn->prepare($sql);
-$params = array_merge([$predmet_id], $razredi);
-$types = 'i' . str_repeat('i', count($razredi));
-$stmt->bind_param($types, ...$params);
-$stmt->execute();
-$result = $stmt->get_result();
-$row = $result->fetch_assoc();
-
-if ($row['cnt'] == 0) {
-    echo "Nimate dostopa do te naloge.";
-    exit();
-}
-
 // Pridobimo podrobnosti o nalogi
 $stmt = $conn->prepare("SELECT np.*, p.ime_predmeta FROM naloge_predmet np INNER JOIN predmeti p ON np.ID_predmeta = p.ID_predmeta WHERE np.ID_naloge_predmet = ?");
 $stmt->bind_param("i", $naloga_predmet_id);
@@ -97,11 +81,8 @@ if (isset($_POST['submit_assignment'])) {
 
     $target_file = $target_dir . basename($new_filename);
 
-    // Preverimo dovoljene tipe datotek
-    $fileType = strtolower($file_extension);
-    $allowedTypes = array('pdf', 'doc', 'docx', 'txt');
-
-    if (in_array($fileType, $allowedTypes)) {
+    // Preverimo velikost datoteke (na primer, omejimo na 50 MB)
+    if ($_FILES['datoteka']['size'] <= 50 * 1024 * 1024) { // 50 MB
         if (move_uploaded_file($_FILES['datoteka']['tmp_name'], $target_file)) {
             // Vstavimo ali posodobimo oddano nalogo
             if ($oddana_naloga) {
@@ -128,7 +109,7 @@ if (isset($_POST['submit_assignment'])) {
             $error = "Napaka pri nalaganju datoteke.";
         }
     } else {
-        $error = "Dovoljene so samo naslednje oblike datotek: PDF, DOC, DOCX, TXT.";
+        $error = "Datoteka je prevelika. Največja dovoljena velikost je 50 MB.";
     }
 }
 
@@ -144,6 +125,16 @@ $komentarji = $stmt->get_result();
     <meta charset="UTF-8">
     <title><?php echo htmlspecialchars($naloga['naslov_naloge']); ?></title>
     <link rel="stylesheet" href="style.css">
+    <script>
+        function confirmSubmission(event) {
+            if (<?php echo $oddana_naloga ? 'true' : 'false'; ?>) {
+                // Prikažemo opozorilo le, če je naloga že oddana
+                if (!confirm("Naloga je že oddana. Ali res želite ponovno oddati nalogo?")) {
+                    event.preventDefault(); // Preprečimo oddajo obrazca
+                }
+            }
+        }
+    </script>
 </head>
 <body>
     <!-- Header -->
@@ -189,7 +180,7 @@ $komentarji = $stmt->get_result();
 
             <!-- Assignment submission -->
             <h4>Oddaja naloge:</h4>
-            <form action="assignment.php?id=<?php echo $naloga_predmet_id; ?>" method="post" enctype="multipart/form-data">
+            <form action="assignment.php?id=<?php echo $naloga_predmet_id; ?>" method="post" enctype="multipart/form-data" onsubmit="confirmSubmission(event)">
                 <label>Izberite datoteko:</label>
                 <input type="file" name="datoteka" required><br>
                 <button type="submit" name="submit_assignment">Oddaj nalogo</button>
