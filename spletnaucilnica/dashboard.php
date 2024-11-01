@@ -180,7 +180,7 @@ if (isset($_GET['error'])) {
                 echo "<p style='color:red;'>$error</p>";
             }
             ?>
-
+            
             <?php if ($vloga == 'učenec'): ?>
                 <h4>Moji predmeti:
                     <button onclick="document.getElementById('subjectList').style.display='block'">+</button>

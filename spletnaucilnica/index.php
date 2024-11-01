@@ -3,38 +3,43 @@
 session_start();
 include('config.php');
 
-// Če je uporabnik že prijavljen, ga preusmerimo na nadzorno ploščo
+// Preverimo, ali je uporabnik že prijavljen
 if (isset($_SESSION['user_id'])) {
     header("Location: dashboard.php");
     exit();
 }
 
-if (isset($_POST['login'])) {
-    $username = $conn->real_escape_string($_POST['username']);
+$error = '';
+
+if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+    $username_or_email = $conn->real_escape_string($_POST['username_or_email']);
     $password = $_POST['password'];
 
-    // Pripravimo poizvedbo z uporabo pripravljenih izjav
-    $stmt = $conn->prepare("SELECT * FROM uporabniki WHERE uporabnisko_ime = ?");
-    $stmt->bind_param("s", $username);
+    // Preverimo, ali obstaja uporabnik z danim uporabniškim imenom ali emailom
+    $stmt = $conn->prepare("SELECT * FROM uporabniki WHERE uporabnisko_ime = ? OR email = ?");
+    $stmt->bind_param("ss", $username_or_email, $username_or_email);
     $stmt->execute();
     $result = $stmt->get_result();
 
-    if ($result->num_rows == 1) {
+    if ($result->num_rows > 0) {
         $user = $result->fetch_assoc();
         // Preverimo geslo
         if (password_verify($password, $user['geslo'])) {
+            // Shranimo podatke v sejo
             $_SESSION['user_id'] = $user['ID_uporabnika'];
+            $_SESSION['username'] = $user['uporabnisko_ime'];
             $_SESSION['role'] = $user['vloga'];
             header("Location: dashboard.php");
             exit();
         } else {
-            $error = "Napačno uporabniško ime ali geslo.";
+            $error = "Napačno geslo.";
         }
     } else {
-        $error = "Napačno uporabniško ime ali geslo.";
+        $error = "Uporabniško ime ali e-pošta ne obstajata.";
     }
 }
 ?>
+
 <!DOCTYPE html>
 <html lang="sl">
 <head>
@@ -58,8 +63,8 @@ if (isset($_POST['login'])) {
         <h2>Prijava v sistem</h2>
         <?php if (isset($error)) echo "<p style='color:red;'>$error</p>"; ?>
         <form action="index.php" method="post" class="form-container">
-            <label>Uporabniško ime:</label>
-            <input type="text" name="username" required><br>
+            <label>Uporabniško ime ali e-pošta:</label>
+            <input type="text" name="username_or_email" required><br>
             <label>Geslo:</label>
             <input type="password" name="password" required><br>
             <button type="submit" name="login">Prijava</button>

@@ -77,19 +77,35 @@ if ($vloga == 'učitelj' && isset($_POST['upload_material'])) {
 if ($vloga == 'učitelj' && isset($_POST['add_assignment'])) {
     $naslov_naloge = $conn->real_escape_string($_POST['naslov_naloge']);
     $opis_naloge = $conn->real_escape_string($_POST['opis_naloge']);
-    $rok_oddaje = $conn->real_escape_string($_POST['rok_oddaje']);
+    $rok_oddaje = $_POST['rok_oddaje'];
+    $datoteka_naloge = $_FILES['datoteka_naloge']['name'];
+    $target_dir = "uploads/assignments/";
 
-    // Vstavimo novo nalogo v bazo
-    $stmt = $conn->prepare("INSERT INTO naloge_predmet (ID_predmeta, naslov_naloge, opis, rok_oddaje) VALUES (?, ?, ?, ?)");
-    $stmt->bind_param("isss", $predmet_id, $naslov_naloge, $opis_naloge, $rok_oddaje);
+    // Preverimo in ustvarimo mapo, če ne obstaja
+    if (!file_exists($target_dir)) {
+        mkdir($target_dir, 0777, true);
+    }
 
-    if ($stmt->execute()) {
-        $success_assignment = "Naloga je bila uspešno dodana.";
+    $target_file = $target_dir . basename($datoteka_naloge);
+    $uploadOk = true;
+
+    // Premakni datoteko na strežnik
+    if ($datoteka_naloge && move_uploaded_file($_FILES['datoteka_naloge']['tmp_name'], $target_file)) {
+        // Vstavimo nalogo v bazo z lokacijo datoteke
+        $stmt = $conn->prepare("INSERT INTO naloge_predmet (ID_predmeta, naslov_naloge, opis, rok_oddaje, pot_do_datoteke) VALUES (?, ?, ?, ?, ?)");
+        $stmt->bind_param("issss", $predmet_id, $naslov_naloge, $opis_naloge, $rok_oddaje, $target_file);
+
+        if ($stmt->execute()) {
+            $success_assignment = "Naloga je bila uspešno dodana.";
+        } else {
+            $error_assignment = "Napaka pri shranjevanju naloge v bazo: " . $conn->error;
+        }
     } else {
-        $error_assignment = "Napaka pri shranjevanju naloge v bazo: " . $conn->error;
+        $error_assignment = "Napaka pri nalaganju datoteke.";
     }
 }
 ?>
+
 <!DOCTYPE html>
 <html lang="sl">
 <head>
@@ -242,13 +258,15 @@ if ($vloga == 'učitelj' && isset($_POST['add_assignment'])) {
                     if (isset($success_assignment)) echo "<p style='color:green;'>$success_assignment</p>";
                     if (isset($error_assignment)) echo "<p style='color:red;'>$error_assignment</p>";
                     ?>
-                    <form action="subject.php?id=<?php echo $predmet_id; ?>" method="post" class="form-container">
+                    <form action="subject.php?id=<?php echo $predmet_id; ?>" method="post" enctype="multipart/form-data" class="form-container">
                         <label>Naslov naloge:</label>
                         <input type="text" name="naslov_naloge" required><br>
                         <label>Opis:</label>
                         <textarea name="opis_naloge"></textarea><br>
                         <label>Rok oddaje:</label>
                         <input type="datetime-local" name="rok_oddaje" required><br>
+                        <label>Izberite datoteko:</label>
+                        <input type="file" name="datoteka_naloge" required><br>
                         <button type="submit" name="add_assignment">Dodaj nalogo</button>
                     </form>
                 <?php endif; ?>
