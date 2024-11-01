@@ -3,51 +3,30 @@
 session_start();
 include('config.php');
 
-// Preverimo, ali je uporabnik prijavljen in ali je učenec
-if (!isset($_SESSION['user_id']) || $_SESSION['role'] != 'učenec' || !isset($_GET['id'])) {
+// Preverimo, ali je uporabnik prijavljen in ali ima pravilen dostop (učenec ali učitelj)
+if (!isset($_SESSION['user_id']) || !isset($_GET['id'])) {
     header("Location: index.php");
     exit();
 }
 
 $user_id = $_SESSION['user_id'];
 $naloga_predmet_id = intval($_GET['id']);
+$vloga = $_SESSION['role'];
 
-// Preverimo, ali ima učenec dostop do te naloge
-$stmt = $conn->prepare("SELECT ID_razreda FROM ucenci_razredi WHERE ID_ucenca = ?");
-$stmt->bind_param("i", $user_id);
-$stmt->execute();
-$result = $stmt->get_result();
-
-$razredi = [];
-while ($row = $result->fetch_assoc()) {
-    $razredi[] = $row['ID_razreda'];
-}
-
-if (empty($razredi)) {
-    echo "Niste vpisani v noben razred.";
-    exit();
-}
-
-// Preverimo, ali naloga obstaja in ali je pripisana predmetu, do katerega ima učenec dostop
-$stmt = $conn->prepare("SELECT ID_predmeta, pot_do_datoteke FROM naloge_predmet WHERE ID_naloge_predmet = ?");
-$stmt->bind_param("i", $naloga_predmet_id);
-$stmt->execute();
-$result = $stmt->get_result();
-$naloga_predmet = $result->fetch_assoc();
-
-if (!$naloga_predmet) {
-    echo "Naloga ne obstaja.";
-    exit();
-}
-
-$predmet_id = $naloga_predmet['ID_predmeta'];
-$datoteka_naloge = $naloga_predmet['pot_do_datoteke'];
-
-// Pridobimo podrobnosti o nalogi
+// Preverimo, ali naloga obstaja in ali je pripisana predmetu
 $stmt = $conn->prepare("SELECT np.*, p.ime_predmeta FROM naloge_predmet np INNER JOIN predmeti p ON np.ID_predmeta = p.ID_predmeta WHERE np.ID_naloge_predmet = ?");
 $stmt->bind_param("i", $naloga_predmet_id);
 $stmt->execute();
 $naloga = $stmt->get_result()->fetch_assoc();
+
+if (!$naloga) {
+    echo "Naloga ne obstaja.";
+    exit();
+}
+
+$predmet_id = $naloga['ID_predmeta'];
+$rok_oddaje = strtotime($naloga['rok_oddaje']);
+$datoteka_naloge = $naloga['pot_do_datoteke'];
 
 // Preverimo, ali je učenec že oddal to nalogo
 $stmt = $conn->prepare("SELECT * FROM naloge WHERE ID_naloge_predmet = ? AND ID_ucenca = ?");
@@ -55,8 +34,8 @@ $stmt->bind_param("ii", $naloga_predmet_id, $user_id);
 $stmt->execute();
 $oddana_naloga = $stmt->get_result()->fetch_assoc();
 
-// Obdelava oddaje naloge
-if (isset($_POST['submit_assignment'])) {
+// Obdelava oddaje naloge (samo za učence in če rok ni potekel)
+if ($vloga == 'učenec' && time() <= $rok_oddaje && isset($_POST['submit_assignment'])) {
     $komentar = $conn->real_escape_string($_POST['komentar']);
     $datoteka = $_FILES['datoteka']['name'];
 
@@ -113,6 +92,14 @@ if (isset($_POST['submit_assignment'])) {
     }
 }
 
+// Pridobimo oddane naloge vseh učencev (samo za učitelje)
+if ($vloga == 'učitelj') {
+    $stmt = $conn->prepare("SELECT u.ime, u.priimek, n.datum_oddaje, n.pot_do_datoteke FROM ucenci_predmeti up INNER JOIN uporabniki u ON up.ID_ucenca = u.ID_uporabnika LEFT JOIN naloge n ON n.ID_ucenca = u.ID_uporabnika AND n.ID_naloge_predmet = ? WHERE up.ID_predmeta = ?");
+    $stmt->bind_param("ii", $naloga_predmet_id, $predmet_id);
+    $stmt->execute();
+    $oddaje = $stmt->get_result();
+}
+
 // Pridobimo komentarje za to nalogo
 $stmt = $conn->prepare("SELECT kn.*, u.ime, u.priimek FROM komentarji_naloge kn INNER JOIN uporabniki u ON kn.ID_avtorja = u.ID_uporabnika WHERE kn.ID_naloge_predmet = ? ORDER BY kn.datum_komentarja ASC");
 $stmt->bind_param("i", $naloga_predmet_id);
@@ -163,7 +150,7 @@ $komentarji = $stmt->get_result();
         <div class="content">
             <h3><?php echo htmlspecialchars($naloga['naslov_naloge']); ?></h3>
             <p><?php echo nl2br(htmlspecialchars($naloga['opis'])); ?></p>
-            <p><strong>Rok oddaje:</strong> <?php echo date('d.m.Y H:i', strtotime($naloga['rok_oddaje'])); ?></p>
+            <p><strong>Rok oddaje:</strong> <?php echo date('d.m.Y H:i', $rok_oddaje); ?></p>
 
             <?php if (!empty($datoteka_naloge)): ?>
                 <p><strong>Datoteka za nalogo:</strong> <a href="<?php echo htmlspecialchars($datoteka_naloge); ?>" target="_blank">Prenesi nalogo</a></p>
@@ -178,19 +165,50 @@ $komentarji = $stmt->get_result();
             }
             ?>
 
-            <!-- Assignment submission -->
-            <h4>Oddaja naloge:</h4>
-            <form action="assignment.php?id=<?php echo $naloga_predmet_id; ?>" method="post" enctype="multipart/form-data" onsubmit="confirmSubmission(event)">
-                <label>Izberite datoteko:</label>
-                <input type="file" name="datoteka" required><br>
-                <button type="submit" name="submit_assignment">Oddaj nalogo</button>
-            </form>
+            <?php if ($vloga == 'učenec' && time() > $rok_oddaje): ?>
+                <p style="color:red;">Rok za oddajo te naloge je potekel.</p>
+            <?php elseif ($vloga == 'učenec'): ?>
+                <!-- Assignment submission -->
+                <h4>Oddaja naloge:</h4>
+                <form action="assignment.php?id=<?php echo $naloga_predmet_id; ?>" method="post" enctype="multipart/form-data" onsubmit="confirmSubmission(event)">
+                    <label>Izberite datoteko:</label>
+                    <input type="file" name="datoteka" required><br>
+                    <button type="submit" name="submit_assignment">Oddaj nalogo</button>
+                </form>
+            <?php endif; ?>
 
             <!-- Display existing submission if any -->
             <?php if ($oddana_naloga): ?>
                 <h4>Vaša oddana naloga:</h4>
                 <p><strong>Datum oddaje:</strong> <?php echo date('d.m.Y H:i', strtotime($oddana_naloga['datum_oddaje'])); ?></p>
                 <p><a href="<?php echo htmlspecialchars($oddana_naloga['pot_do_datoteke']); ?>" target="_blank">Prenesi oddano nalogo</a></p>
+            <?php endif; ?>
+
+            <?php if ($vloga == 'učitelj'): ?>
+                <!-- Pregled oddanih nalog za učitelje -->
+                <h4>Pregled oddanih nalog:</h4>
+                <table border="1">
+                    <tr>
+                        <th>Ime</th>
+                        <th>Priimek</th>
+                        <th>Datum oddaje</th>
+                        <th>Datoteka</th>
+                    </tr>
+                    <?php while ($oddaja = $oddaje->fetch_assoc()): ?>
+                        <tr>
+                            <td><?php echo htmlspecialchars($oddaja['ime']); ?></td>
+                            <td><?php echo htmlspecialchars($oddaja['priimek']); ?></td>
+                            <td><?php echo $oddaja['datum_oddaje'] ? date('d.m.Y H:i', strtotime($oddaja['datum_oddaje'])) : 'Ni oddano'; ?></td>
+                            <td>
+                                <?php if ($oddaja['pot_do_datoteke']): ?>
+                                    <a href="<?php echo htmlspecialchars($oddaja['pot_do_datoteke']); ?>" target="_blank">Prenesi datoteko</a>
+                                <?php else: ?>
+                                    Ni oddano
+                                <?php endif; ?>
+                            </td>
+                        </tr>
+                    <?php endwhile; ?>
+                </table>
             <?php endif; ?>
 
             <!-- Comments section -->
