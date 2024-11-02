@@ -158,6 +158,7 @@ $current_page = basename($_SERVER['PHP_SELF']); // Pridobi trenutno stran
                     <li><a href="manage_subjects.php" class="<?= ($current_page == 'manage_subjects.php') ? 'active' : '' ?>">Upravljanje predmetov</a></li>
                     <li><a href="manage_teachers.php" class="<?= ($current_page == 'manage_teachers.php') ? 'active' : '' ?>">Upravljanje učiteljev</a></li>
                     <li><a href="manage_students.php" class="<?= ($current_page == 'manage_students.php') ? 'active' : '' ?>">Upravljanje učencev</a></li>
+                    <li><a href="manage_classes.php" class="<?= ($current_page == 'manage_classes.php') ? 'active' : '' ?>">Upravljanje razredov</a></li>
                 <?php elseif ($vloga == 'učitelj'): ?>
                     <li><a href="dashboard.php" class="<?= ($current_page == 'dashboard.php') ? 'active' : '' ?>">Nadzorna plošča</a></li>
                     <li><a href="my_profile.php" class="<?= ($current_page == 'my_profile.php') ? 'active' : '' ?>">Moj profil</a></li>
@@ -230,25 +231,27 @@ $current_page = basename($_SERVER['PHP_SELF']); // Pridobi trenutno stran
                         </form>
                     </div>
                 </div>
-            <?php else: ?>
+            <?php elseif ($vloga == 'učitelj'): ?>
                 <h4>Moji predmeti:</h4>
             <?php endif; ?>
 
-            <div class="subjects-grid">
-                <?php if (!empty($predmeti)): ?>
-                    <?php foreach ($predmeti as $predmet): ?>
-                        <div class="subject-card">
-                            <h4><?php echo htmlspecialchars($predmet['ime_predmeta']); ?></h4>
-                            <a href="subject.php?id=<?php echo $predmet['ID_predmeta']; ?>">Vstopi v predmet</a>
-                            <?php if ($vloga == 'učitelj'): ?>
-                                <p>Vpisni ključ: <?php echo htmlspecialchars($predmet['vpisni_kljuc']); ?></p>
-                            <?php endif; ?>
-                        </div>
-                    <?php endforeach; ?>
-                <?php else: ?>
-                    <p>Trenutno nimate predmetov.</p>
-                <?php endif; ?>
-            </div>
+            <?php if ($vloga == 'učitelj' || $vloga == 'učenec'): ?>
+                <div class="subjects-grid">
+                    <?php if (!empty($predmeti)): ?>
+                        <?php foreach ($predmeti as $predmet): ?>
+                            <div class="subject-card">
+                                <h4><?php echo htmlspecialchars($predmet['ime_predmeta']); ?></h4>
+                                <a href="subject.php?id=<?php echo $predmet['ID_predmeta']; ?>">Vstopi v predmet</a>
+                                <?php if ($vloga == 'učitelj'): ?>
+                                    <p>Vpisni ključ: <?php echo htmlspecialchars($predmet['vpisni_kljuc']); ?></p>
+                                <?php endif; ?>
+                            </div>
+                        <?php endforeach; ?>
+                    <?php else: ?>
+                        <p>Trenutno nimate predmetov.</p>
+                    <?php endif; ?>
+                </div>
+            <?php endif; ?>
         </div>
     </div>
 
