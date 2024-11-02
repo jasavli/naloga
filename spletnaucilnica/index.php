@@ -1,9 +1,7 @@
 <?php
-// index.php
 session_start();
 include('config.php');
 
-// Preverimo, ali je uporabnik že prijavljen
 if (isset($_SESSION['user_id'])) {
     header("Location: dashboard.php");
     exit();
@@ -15,7 +13,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $username_or_email = $conn->real_escape_string($_POST['username_or_email']);
     $password = $_POST['password'];
 
-    // Preverimo, ali obstaja uporabnik z danim uporabniškim imenom ali emailom
     $stmt = $conn->prepare("SELECT * FROM uporabniki WHERE uporabnisko_ime = ? OR email = ?");
     $stmt->bind_param("ss", $username_or_email, $username_or_email);
     $stmt->execute();
@@ -23,9 +20,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
     if ($result->num_rows > 0) {
         $user = $result->fetch_assoc();
-        // Preverimo geslo
         if (password_verify($password, $user['geslo'])) {
-            // Shranimo podatke v sejo
             $_SESSION['user_id'] = $user['ID_uporabnika'];
             $_SESSION['username'] = $user['uporabnisko_ime'];
             $_SESSION['role'] = $user['vloga'];
@@ -48,7 +43,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <!-- Zgornja naslovna vrstica -->
     <div class="header">
         <div class="logo">
             <a href="index.php" style="display: flex; align-items: center; text-decoration: none; color: inherit;">
@@ -58,7 +52,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         </div>
     </div>
 
-    <!-- Vsebina -->
     <div class="centered-container">
         <h2>Prijava v sistem</h2>
         <?php if (isset($error)) echo "<p style='color:red;'>$error</p>"; ?>
