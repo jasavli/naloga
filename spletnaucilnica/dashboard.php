@@ -1,5 +1,4 @@
 <?php
-// dashboard.php
 session_start();
 include('config.php');
 
@@ -11,10 +10,8 @@ if (!isset($_SESSION['user_id'])) {
 $vloga = $_SESSION['role'];
 $user_id = $_SESSION['user_id'];
 
-// Pridobimo ime aplikacije
 $app_name = "Spletna učilnica";
 
-// Pridobimo ime in priimek uporabnika
 $stmt = $conn->prepare("SELECT ime, priimek FROM uporabniki WHERE ID_uporabnika = ?");
 $stmt->bind_param("i", $user_id);
 $stmt->execute();
@@ -22,11 +19,9 @@ $user = $stmt->get_result()->fetch_assoc();
 $ime = $user['ime'];
 $priimek = $user['priimek'];
 
-// Pridobimo predmete, ki jih uporabnik obiskuje ali poučuje
 $predmeti = array();
 
 if ($vloga == 'učitelj') {
-    // Updated query to retrieve all subjects assigned to the teacher across all classes
     $stmt = $conn->prepare("SELECT DISTINCT p.ID_predmeta, p.ime_predmeta, p.vpisni_kljuc
                             FROM predmeti p
                             INNER JOIN ucitelji_predmeti_razredi upr ON p.ID_predmeta = upr.ID_predmeta
@@ -38,7 +33,6 @@ if ($vloga == 'učitelj') {
         $predmeti[] = $row;
     }
 } elseif ($vloga == 'učenec') {
-    // Pridobimo predmete, v katere je učenec vpisan
     $stmt = $conn->prepare("SELECT p.ID_predmeta, p.ime_predmeta
                             FROM predmeti p
                             INNER JOIN ucenci_predmeti up ON p.ID_predmeta = up.ID_predmeta
@@ -57,7 +51,7 @@ if (isset($_GET['success'])) {
 if (isset($_GET['error'])) {
     $error = urldecode($_GET['error']);
 }
-$current_page = basename($_SERVER['PHP_SELF']); // Pridobi trenutno stran
+$current_page = basename($_SERVER['PHP_SELF']);
 ?>
 <!DOCTYPE html>
 <html lang="sl">
@@ -66,7 +60,6 @@ $current_page = basename($_SERVER['PHP_SELF']); // Pridobi trenutno stran
     <title>Nadzorna plošča</title>
     <link rel="stylesheet" href="style.css">
     <style>
-    /* Stil za modalna okna */
     .modal {
         display: none;
         position: fixed;
@@ -105,7 +98,6 @@ $current_page = basename($_SERVER['PHP_SELF']); // Pridobi trenutno stran
         cursor: pointer;
     }
 
-    /* Dodatni stili */
     .subjects-grid {
         display: flex;
         flex-wrap: wrap;
@@ -137,7 +129,6 @@ $current_page = basename($_SERVER['PHP_SELF']); // Pridobi trenutno stran
     </style>
 </head>
 <body>
-    <!-- Zgornja naslovna vrstica -->
     <div class="header">
         <div class="logo">
         <a href="dashboard.php" style="display: flex; align-items: center; text-decoration: none; color: inherit;">
@@ -148,9 +139,7 @@ $current_page = basename($_SERVER['PHP_SELF']); // Pridobi trenutno stran
         <a href="logout.php" class="logout">Odjava</a>
     </div>
 
-    <!-- Glavni vsebinski del -->
     <div class="main-content">
-        <!-- Levi stranski meni -->
         <div class="sidebar">
             <ul>
                 <?php if ($vloga == 'administrator'): ?>
@@ -171,7 +160,6 @@ $current_page = basename($_SERVER['PHP_SELF']); // Pridobi trenutno stran
             </ul>
         </div>
 
-        <!-- Vsebina -->
         <div class="content">
             <h3>Pozdravljeni, <?php echo htmlspecialchars($ime . ' ' . $priimek); ?>!</h3>
 
@@ -189,13 +177,11 @@ $current_page = basename($_SERVER['PHP_SELF']); // Pridobi trenutno stran
                     <button onclick="document.getElementById('subjectList').style.display='block'">+</button>
                 </h4>
 
-                <!-- Modal za seznam predmetov -->
                 <div id="subjectList" class="modal">
                     <div class="modal-content">
                         <span class="close" onclick="document.getElementById('subjectList').style.display='none'">&times;</span>
                         <h3>Pridruži se predmetu</h3>
                         <?php
-                        // Pridobimo vse predmete, v katere učenec še ni vpisan
                         $stmt = $conn->prepare("SELECT * FROM predmeti WHERE ID_predmeta NOT IN (SELECT ID_predmeta FROM ucenci_predmeti WHERE ID_ucenca = ?)");
                         $stmt->bind_param("i", $user_id);
                         $stmt->execute();
@@ -217,7 +203,6 @@ $current_page = basename($_SERVER['PHP_SELF']); // Pridobi trenutno stran
                     </div>
                 </div>
 
-                <!-- Modal za vpisni obrazec -->
                 <div id="enrollmentForm" class="modal">
                     <div class="modal-content">
                         <span class="close" onclick="document.getElementById('enrollmentForm').style.display='none'">&times;</span>
@@ -254,7 +239,6 @@ $current_page = basename($_SERVER['PHP_SELF']); // Pridobi trenutno stran
         </div>
     </div>
 
-    <!-- JavaScript funkcije -->
     <script>
     function showEnrollmentForm(subjectId, subjectName) {
         document.getElementById('subject_id').value = subjectId;
@@ -263,7 +247,6 @@ $current_page = basename($_SERVER['PHP_SELF']); // Pridobi trenutno stran
         document.getElementById('subjectList').style.display = 'none';
     }
 
-    // Zapremo modal, ko kliknemo zunaj njega
     window.onclick = function(event) {
         var modal1 = document.getElementById('subjectList');
         var modal2 = document.getElementById('enrollmentForm');

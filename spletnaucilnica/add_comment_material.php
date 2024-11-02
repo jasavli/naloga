@@ -1,5 +1,4 @@
 <?php
-// add_comment_material.php
 session_start();
 include('config.php');
 
@@ -16,10 +15,8 @@ $stmt = $conn->prepare("INSERT INTO komentarji_gradiva (ID_gradiva, ID_avtorja, 
 $stmt->bind_param("iis", $gradivo_id, $avtor_id, $vsebina);
 
 if ($stmt->execute()) {
-    // Uspeh
     header("Location: subject.php?id=" . $_GET['id']);
 } else {
-    // Napaka
     echo "Napaka pri dodajanju komentarja: " . $conn->error;
 }
 ?>
