@@ -27,7 +27,7 @@ $predmeti = array();
 
 if ($vloga == 'učitelj') {
     // Pridobimo predmete, ki jih učitelj poučuje
-    $stmt = $conn->prepare("SELECT DISTINCT p.ID_predmeta, p.ime_predmeta, p.vpisni_kljuc
+    $stmt = $conn->prepare("SELECT p.ID_predmeta, p.ime_predmeta, p.vpisni_kljuc
                             FROM predmeti p
                             INNER JOIN ucitelji_predmeti up ON p.ID_predmeta = up.ID_predmeta
                             WHERE up.ID_ucitelja = ?");
@@ -162,7 +162,6 @@ $current_page = basename($_SERVER['PHP_SELF']); // Pridobi trenutno stran
                 <?php elseif ($vloga == 'učitelj'): ?>
                     <li><a href="dashboard.php" class="<?= ($current_page == 'dashboard.php') ? 'active' : '' ?>">Nadzorna plošča</a></li>
                     <li><a href="my_profile.php" class="<?= ($current_page == 'my_profile.php') ? 'active' : '' ?>">Moj profil</a></li>
-                    <li><a href="upload_materials.php" class="<?= ($current_page == 'upload_materials.php') ? 'active' : '' ?>">Nalaganje gradiv</a></li>
                     <li><a href="view_submissions.php" class="<?= ($current_page == 'view_submissions.php') ? 'active' : '' ?>">Oddane naloge</a></li>
                 <?php elseif ($vloga == 'učenec'): ?>
                     <li><a href="dashboard.php" class="<?= ($current_page == 'dashboard.php') ? 'active' : '' ?>">Nadzorna plošča</a></li>
