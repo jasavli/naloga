@@ -10,6 +10,7 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] != 'administrator') {
 }
 
 $action = isset($_GET['action']) ? $_GET['action'] : 'list';
+$class_id = isset($_GET['id']) ? intval($_GET['id']) : 0;
 
 // Dodajanje novega razreda
 if ($action == 'add' && isset($_POST['add_class'])) {
@@ -21,6 +22,32 @@ if ($action == 'add' && isset($_POST['add_class'])) {
         $success = "Razred uspešno dodan.";
     } else {
         $error = "Napaka pri dodajanju razreda: " . $conn->error;
+    }
+}
+
+// Urejanje razreda
+if ($action == 'edit' && isset($_POST['edit_class']) && $class_id > 0) {
+    $ime_razreda = $conn->real_escape_string($_POST['ime_razreda']);
+    
+    $stmt = $conn->prepare("UPDATE razredi SET ime_razreda = ? WHERE ID_razreda = ?");
+    $stmt->bind_param("si", $ime_razreda, $class_id);
+    if ($stmt->execute()) {
+        $success = "Razred uspešno posodobljen.";
+        $action = 'list';  // Po posodobitvi se vrnemo na seznam
+    } else {
+        $error = "Napaka pri posodabljanju razreda: " . $conn->error;
+    }
+}
+
+// Brisanje razreda
+if ($action == 'delete' && $class_id > 0) {
+    $stmt = $conn->prepare("DELETE FROM razredi WHERE ID_razreda = ?");
+    $stmt->bind_param("i", $class_id);
+    if ($stmt->execute()) {
+        $success = "Razred uspešno izbrisan.";
+        $action = 'list';  // Po brisanju se vrnemo na seznam
+    } else {
+        $error = "Napaka pri brisanju razreda: " . $conn->error;
     }
 }
 
@@ -77,11 +104,16 @@ $current_page = basename($_SERVER['PHP_SELF']); // Pridobi trenutno stran
                     <tr>
                         <th>ID</th>
                         <th>Ime razreda</th>
+                        <th>Akcije</th>
                     </tr>
                     <?php while ($razred = $razredi->fetch_assoc()): ?>
                         <tr>
                             <td><?php echo $razred['ID_razreda']; ?></td>
                             <td><?php echo htmlspecialchars($razred['ime_razreda']); ?></td>
+                            <td>
+                                <a href="manage_classes.php?action=edit&id=<?php echo $razred['ID_razreda']; ?>">Uredi</a> |
+                                <a href="manage_classes.php?action=delete&id=<?php echo $razred['ID_razreda']; ?>" onclick="return confirm('Ali ste prepričani, da želite izbrisati ta razred?');">Izbriši</a>
+                            </td>
                         </tr>
                     <?php endwhile; ?>
                 </table>
@@ -91,6 +123,21 @@ $current_page = basename($_SERVER['PHP_SELF']); // Pridobi trenutno stran
                     <label>Ime razreda:</label>
                     <input type="text" name="ime_razreda" required>
                     <button type="submit" name="add_class">Dodaj razred</button>
+                    <a href="manage_classes.php" class="button">Prekliči</a>
+                </form>
+            <?php elseif ($action == 'edit' && $class_id > 0): ?>
+                <?php
+                // Pridobimo trenutne podatke o razredu
+                $stmt = $conn->prepare("SELECT ime_razreda FROM razredi WHERE ID_razreda = ?");
+                $stmt->bind_param("i", $class_id);
+                $stmt->execute();
+                $razred = $stmt->get_result()->fetch_assoc();
+                ?>
+                <h4>Uredi razred</h4>
+                <form action="manage_classes.php?action=edit&id=<?php echo $class_id; ?>" method="post">
+                    <label>Ime razreda:</label>
+                    <input type="text" name="ime_razreda" value="<?php echo htmlspecialchars($razred['ime_razreda']); ?>" required>
+                    <button type="submit" name="edit_class">Shrani spremembe</button>
                     <a href="manage_classes.php" class="button">Prekliči</a>
                 </form>
             <?php endif; ?>
