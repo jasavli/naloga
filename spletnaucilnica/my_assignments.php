@@ -143,7 +143,7 @@ $current_page = basename($_SERVER['PHP_SELF']); // Pridobi trenutno stran
             <?php else: ?>
                 <p>Trenutno nimate nalog za oddajo.</p>
             <?php endif; ?>
-
+                <br>
             <h3>Oddane naloge</h3>
             <?php if ($oddane_naloge->num_rows > 0): ?>
                 <table class="assignment-table">
