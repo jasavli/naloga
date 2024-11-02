@@ -178,7 +178,6 @@ $current_page = basename($_SERVER['PHP_SELF']); // Pridobi trenutno stran
                 <?php if ($vloga == 'učitelj'): ?>
                     <li><a href="dashboard.php" class="<?= ($current_page == 'dashboard.php') ? 'active' : '' ?>">Nadzorna plošča</a></li>
                     <li><a href="my_profile.php" class="<?= ($current_page == 'my_profile.php') ? 'active' : '' ?>">Moj profil</a></li>
-                    <li><a href="upload_materials.php" class="<?= ($current_page == 'upload_materials.php') ? 'active' : '' ?>">Nalaganje gradiv</a></li>
                     <li><a href="view_submissions.php" class="<?= ($current_page == 'view_submissions.php') ? 'active' : '' ?>">Oddane naloge</a></li>
                 <?php elseif ($vloga == 'učenec'): ?>
                     <li><a href="dashboard.php" class="<?= ($current_page == 'dashboard.php') ? 'active' : '' ?>">Nadzorna plošča</a></li>
