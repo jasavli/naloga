@@ -198,7 +198,7 @@ $current_page = basename($_SERVER['PHP_SELF']); // Pridobi trenutno stran
                 <form action="subject.php?id=<?php echo $predmet_id; ?>" method="post" style="margin-bottom: 20px;">
                     <?php if (isset($error_leave)) echo "<p style='color:red;'>$error_leave</p>"; ?>
                     <button type="submit" name="leave_subject" onclick="return confirm('Ali ste prepričani, da želite zapustiti ta predmet?');">
-                        Zapusti učilnico
+                        Izpis iz predmeta
                     </button>
                 </form>
             <?php endif; ?>
