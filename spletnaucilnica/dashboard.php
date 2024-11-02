@@ -222,7 +222,7 @@ if (isset($_GET['error'])) {
                         <form action="enroll_subject.php" method="post" class="form-container">
                             <input type="hidden" name="subject_id" id="subject_id">
                             <label>Vpisni ključ:</label>
-                            <input type="text" name="vpisni_kljuc" required><br>
+                            <input type="text" name="vpisni_kljuc"><br>
                             <button type="submit" name="enroll">Vpiši se</button>
                         </form>
                     </div>
