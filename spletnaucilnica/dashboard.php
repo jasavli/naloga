@@ -26,11 +26,11 @@ $priimek = $user['priimek'];
 $predmeti = array();
 
 if ($vloga == 'učitelj') {
-    // Pridobimo predmete, ki jih učitelj poučuje
-    $stmt = $conn->prepare("SELECT p.ID_predmeta, p.ime_predmeta, p.vpisni_kljuc
+    // Updated query to retrieve all subjects assigned to the teacher across all classes
+    $stmt = $conn->prepare("SELECT DISTINCT p.ID_predmeta, p.ime_predmeta, p.vpisni_kljuc
                             FROM predmeti p
-                            INNER JOIN ucitelji_predmeti up ON p.ID_predmeta = up.ID_predmeta
-                            WHERE up.ID_ucitelja = ?");
+                            INNER JOIN ucitelji_predmeti_razredi upr ON p.ID_predmeta = upr.ID_predmeta
+                            WHERE upr.ID_ucitelja = ?");
     $stmt->bind_param("i", $user_id);
     $stmt->execute();
     $result = $stmt->get_result();
