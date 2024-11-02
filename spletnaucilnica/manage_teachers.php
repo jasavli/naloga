@@ -86,9 +86,9 @@ if ($action == 'edit' && isset($_POST['edit_teacher'])) {
         $stmt->bind_param("i", $ID_ucitelja);
         $stmt->execute();
         // Nato dodamo nove dodelitve
+        $stmt = $conn->prepare("INSERT INTO ucitelji_predmeti_razredi (ID_ucitelja, ID_predmeta, ID_razreda) VALUES (?, ?, ?)");
         foreach ($predmeti as $ID_predmeta) {
             foreach ($razredi as $ID_razreda) {
-                $stmt = $conn->prepare("INSERT INTO ucitelji_predmeti_razredi (ID_ucitelja, ID_predmeta, ID_razreda) VALUES (?, ?, ?)");
                 $stmt->bind_param("iii", $ID_ucitelja, $ID_predmeta, $ID_razreda);
                 $stmt->execute();
             }
