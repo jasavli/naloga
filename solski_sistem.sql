@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Gostitelj: 127.0.0.1
--- Čas nastanka: 28. okt 2024 ob 15.18
+-- Čas nastanka: 02. nov 2024 ob 19.43
 -- Različica strežnika: 10.4.32-MariaDB
 -- Različica PHP: 8.2.12
 
@@ -33,17 +33,20 @@ CREATE TABLE `gradiva` (
   `ID_ucitelja` int(11) NOT NULL,
   `naslov_gradiva` varchar(255) NOT NULL,
   `pot_do_datoteke` varchar(255) NOT NULL,
-  `datum_objave` datetime DEFAULT current_timestamp()
+  `datum_objave` datetime DEFAULT current_timestamp(),
+  `opis` text DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Odloži podatke za tabelo `gradiva`
 --
 
-INSERT INTO `gradiva` (`ID_gradiva`, `ID_predmeta`, `ID_ucitelja`, `naslov_gradiva`, `pot_do_datoteke`, `datum_objave`) VALUES
-(3, 2, 3, 'Prešernove pesmi', 'uploads/presernove_pesmi.pdf', '2024-10-28 10:26:32'),
-(4, 4, 3, 'Periodni sistem elementov', 'uploads/periodni_sistem.pdf', '2024-10-28 10:26:32'),
-(5, 5, 3, 'Srednji vek v Evropi', 'uploads/srednji_vek.pdf', '2024-10-28 10:26:32');
+INSERT INTO `gradiva` (`ID_gradiva`, `ID_predmeta`, `ID_ucitelja`, `naslov_gradiva`, `pot_do_datoteke`, `datum_objave`, `opis`) VALUES
+(9, 1, 2, 'rešujte naloge 1', 'uploads/materials/Posnetek zaslona 2024-10-19 213923.png', '2024-11-02 14:47:10', ''),
+(10, 1, 2, 'rešujte naloge 2', 'uploads/materials/Posnetek zaslona 2024-10-17 143649.png', '2024-11-02 14:47:23', 'rešite vse'),
+(11, 1, 2, 'naloge vis', 'uploads/materials/20241010_164527.jpg', '2024-11-02 18:29:43', 'halo'),
+(18, 3, 2, 'ay', 'uploads/materials/logo.png', '2024-11-02 18:40:15', NULL),
+(19, 3, 2, 'ay', 'uploads/materials/logo.png', '2024-11-02 18:40:34', NULL);
 
 -- --------------------------------------------------------
 
@@ -58,13 +61,6 @@ CREATE TABLE `komentarji_gradiva` (
   `vsebina` text NOT NULL,
   `datum_komentarja` datetime DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
---
--- Odloži podatke za tabelo `komentarji_gradiva`
---
-
-INSERT INTO `komentarji_gradiva` (`ID_komentarja`, `ID_gradiva`, `ID_avtorja`, `vsebina`, `datum_komentarja`) VALUES
-(1, 4, 6, 'Zdravo', '2024-10-28 11:57:38');
 
 -- --------------------------------------------------------
 
@@ -86,7 +82,16 @@ CREATE TABLE `komentarji_naloge` (
 
 INSERT INTO `komentarji_naloge` (`ID_komentarja`, `ID_naloge_predmet`, `ID_avtorja`, `vsebina`, `datum_komentarja`) VALUES
 (1, 2, 6, 'Hello', '2024-10-28 14:48:09'),
-(2, 1, 6, 'skret', '2024-10-28 14:49:30');
+(2, 1, 6, 'skret', '2024-10-28 14:49:30'),
+(3, 3, 6, 'Ne vidim datoteke, kjer so naloge.', '2024-10-30 12:18:30'),
+(4, 4, 6, 'hwj', '2024-11-01 14:14:55'),
+(5, 5, 6, 'Spremenite rok oddaje.\\r\\n', '2024-11-01 14:38:26'),
+(6, 5, 2, 'Seveda', '2024-11-01 14:38:45'),
+(7, 5, 2, 'Urejeno', '2024-11-02 12:19:51'),
+(8, 5, 2, 'Kako ste?', '2024-11-02 12:20:17'),
+(9, 7, 2, 'asdf\\r\\n\\r\\n\\r\\n', '2024-11-02 18:57:52'),
+(10, 1, 2, 'sydv\\r\\n\\r\\n\\r\\n', '2024-11-02 19:04:07'),
+(11, 8, 2, 'asd ', '2024-11-02 19:07:58');
 
 -- --------------------------------------------------------
 
@@ -114,7 +119,12 @@ INSERT INTO `naloge` (`ID_naloge`, `ID_naloge_predmet`, `ID_predmeta`, `ID_ucenc
 (3, 0, 2, 5, 'Analiza pesmi', 'uploads/Petek Nina – Analiza pesmi.pdf', '2024-10-28 10:26:32'),
 (4, 0, 4, 6, 'Kemijske reakcije', 'uploads/Petek Nina – Kemijske reakcije.pdf', '2024-10-28 10:26:32'),
 (5, 0, 5, 4, 'Rimljani na naših tleh', 'uploads/Zupan Luka – Rimljani na naših tleh.pdf', '2024-10-28 10:26:32'),
-(6, 1, 1, 6, 'Naloga iz algebraičnih enačb', 'uploads/assignments/Žvegler Miha – Naloga iz algebraičnih enačb.pdf', '2024-10-28 14:35:00');
+(6, 1, 1, 6, 'Naloga iz algebraičnih enačb', 'uploads/assignments/Žvegler Miha – Naloga iz algebraičnih enačb.pdf', '2024-11-01 12:37:55'),
+(7, 2, 2, 6, 'Esej o Prešernu', 'uploads/assignments/Žvegler Miha – Esej o Prešernu.pdf', '2024-10-30 12:13:17'),
+(8, 3, 1, 6, 'naloge vis', 'uploads/assignments/Žvegler Miha – naloge vis.pdf', '2024-11-01 20:52:08'),
+(9, 4, 1, 6, 'naloge vis 2', 'uploads/assignments/Žvegler Miha – naloge vis 2.zip', '2024-11-02 15:00:57'),
+(10, 5, 1, 6, 'reši', 'uploads/assignments/Žvegler Miha – reši.pdf', '2024-11-01 14:25:37'),
+(11, 6, 3, 6, 'naloge vis 3', 'uploads/assignments/Žvegler Miha – naloge vis 3.pdf', '2024-11-02 15:54:16');
 
 -- --------------------------------------------------------
 
@@ -128,16 +138,22 @@ CREATE TABLE `naloge_predmet` (
   `naslov_naloge` varchar(255) NOT NULL,
   `opis` text DEFAULT NULL,
   `datum_objave` datetime DEFAULT current_timestamp(),
-  `rok_oddaje` datetime DEFAULT NULL
+  `rok_oddaje` datetime DEFAULT NULL,
+  `pot_do_datoteke` varchar(255) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Odloži podatke za tabelo `naloge_predmet`
 --
 
-INSERT INTO `naloge_predmet` (`ID_naloge_predmet`, `ID_predmeta`, `naslov_naloge`, `opis`, `datum_objave`, `rok_oddaje`) VALUES
-(1, 1, 'Naloga iz algebraičnih enačb', 'Rešite naslednje enačbe...', '2024-10-28 12:59:25', '2024-12-31 23:59:59'),
-(2, 2, 'Esej o Prešernu', 'Napišite esej o življenju in delu Franceta Prešerna...', '2024-10-28 12:59:25', '2024-11-30 23:59:59');
+INSERT INTO `naloge_predmet` (`ID_naloge_predmet`, `ID_predmeta`, `naslov_naloge`, `opis`, `datum_objave`, `rok_oddaje`, `pot_do_datoteke`) VALUES
+(1, 1, 'Naloga iz algebraičnih enačb', 'Rešite naslednje enačbe...', '2024-10-28 12:59:25', '2024-12-31 23:59:59', NULL),
+(2, 2, 'Esej o Prešernu', 'Napišite esej o življenju in delu Franceta Prešerna...', '2024-10-28 12:59:25', '2024-11-30 23:59:59', NULL),
+(3, 1, 'naloge vis', 'Rešite naloge in jih oddaje v .pdf obliki.', '2024-10-30 12:16:58', '2024-11-14 12:16:00', NULL),
+(4, 1, 'naloge vis 2', 'rešite in naložite v .pdf', '2024-11-01 14:07:14', '2024-11-29 14:05:00', 'uploads/assignments/Naloge VIS II.pdf'),
+(5, 1, 'reši', 'reši in oddaj', '2024-11-01 14:25:24', '2024-10-31 14:25:00', 'uploads/assignments/Naloge VIS II.pdf'),
+(7, 1, 'naloge vis', '\\r\\nopus\\r\\n', '2024-11-02 18:57:34', '2024-11-29 18:57:00', 'uploads/assignments/20241011_191652.jpg'),
+(8, 1, 'as', 'fasf\\r\\n\\r\\n\\r\\n', '2024-11-02 19:02:06', '2024-12-06 19:01:00', 'uploads/assignments/20241011_191558.jpg');
 
 -- --------------------------------------------------------
 
@@ -148,19 +164,21 @@ INSERT INTO `naloge_predmet` (`ID_naloge_predmet`, `ID_predmeta`, `naslov_naloge
 CREATE TABLE `predmeti` (
   `ID_predmeta` int(11) NOT NULL,
   `ime_predmeta` varchar(100) NOT NULL,
-  `opis_predmeta` text DEFAULT NULL
+  `opis_predmeta` text DEFAULT NULL,
+  `vpisni_kljuc` varchar(255) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Odloži podatke za tabelo `predmeti`
 --
 
-INSERT INTO `predmeti` (`ID_predmeta`, `ime_predmeta`, `opis_predmeta`) VALUES
-(1, 'Matematika', 'Osnovni in napredni koncepti matematike.'),
-(2, 'Slovenščina', 'Učenje slovenskega jezika in književnosti.'),
-(3, 'Fizika', 'Osnove fizikalnih zakonitosti.'),
-(4, 'Kemija', 'Spoznavanje kemijskih elementov in reakcij.'),
-(5, 'Zgodovina', 'Pregled svetovne in slovenske zgodovine.');
+INSERT INTO `predmeti` (`ID_predmeta`, `ime_predmeta`, `opis_predmeta`, `vpisni_kljuc`) VALUES
+(1, 'Matematika', 'Osnovni in napredni koncepti matematike.', 'mat1'),
+(2, 'Slovenščina', 'Učenje slovenskega jezika in književnosti.', NULL),
+(3, 'Fizika', 'Osnove fizikalnih zakonitosti.', 'fizika'),
+(4, 'Kemija', 'Spoznavanje kemijskih elementov in reakcij.', NULL),
+(5, 'Zgodovina', 'Pregled svetovne in slovenske zgodovine.', NULL),
+(6, 'SMV', 'Stroka moderne vsebine', 'smv_VPIS');
 
 -- --------------------------------------------------------
 
@@ -172,20 +190,6 @@ CREATE TABLE `predmeti_razredi` (
   `ID_predmeta` int(11) NOT NULL,
   `ID_razreda` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
---
--- Odloži podatke za tabelo `predmeti_razredi`
---
-
-INSERT INTO `predmeti_razredi` (`ID_predmeta`, `ID_razreda`) VALUES
-(1, 1),
-(1, 2),
-(2, 1),
-(2, 2),
-(3, 1),
-(4, 2),
-(5, 1),
-(5, 2);
 
 -- --------------------------------------------------------
 
@@ -203,11 +207,14 @@ CREATE TABLE `razredi` (
 --
 
 INSERT INTO `razredi` (`ID_razreda`, `ime_razreda`) VALUES
-(1, '1.A'),
-(2, '1.B'),
-(3, '2.A'),
-(4, '2.B'),
-(5, '3.A');
+(6, 'R1A'),
+(7, 'R1B'),
+(8, 'R2A'),
+(9, 'R2B'),
+(10, 'R3A'),
+(11, 'R3B'),
+(12, 'R4A'),
+(13, 'R4B');
 
 -- --------------------------------------------------------
 
@@ -226,16 +233,16 @@ CREATE TABLE `ucenci_predmeti` (
 
 INSERT INTO `ucenci_predmeti` (`ID_ucenca`, `ID_predmeta`) VALUES
 (4, 1),
-(4, 3),
 (4, 5),
 (5, 1),
 (5, 2),
 (5, 4),
 (6, 1),
-(6, 2),
 (6, 3),
 (6, 4),
-(6, 5);
+(6, 6),
+(9, 1),
+(9, 6);
 
 -- --------------------------------------------------------
 
@@ -253,8 +260,8 @@ CREATE TABLE `ucenci_razredi` (
 --
 
 INSERT INTO `ucenci_razredi` (`ID_ucenca`, `ID_razreda`) VALUES
-(4, 1),
-(6, 2);
+(4, 9),
+(6, 6);
 
 -- --------------------------------------------------------
 
@@ -274,9 +281,8 @@ CREATE TABLE `ucitelji_predmeti` (
 INSERT INTO `ucitelji_predmeti` (`ID_ucitelja`, `ID_predmeta`) VALUES
 (2, 1),
 (2, 3),
-(3, 2),
-(3, 4),
-(3, 5);
+(8, 1),
+(8, 3);
 
 -- --------------------------------------------------------
 
@@ -295,12 +301,18 @@ CREATE TABLE `ucitelji_predmeti_razredi` (
 --
 
 INSERT INTO `ucitelji_predmeti_razredi` (`ID_ucitelja`, `ID_predmeta`, `ID_razreda`) VALUES
-(2, 1, 1),
-(2, 3, 1),
-(3, 2, 2),
-(3, 4, 2),
-(3, 5, 1),
-(3, 5, 2);
+(2, 1, 6),
+(2, 1, 7),
+(2, 1, 8),
+(2, 2, 6),
+(2, 2, 7),
+(2, 2, 8),
+(2, 3, 6),
+(2, 3, 7),
+(2, 3, 8),
+(8, 1, 10),
+(8, 3, 10),
+(8, 4, 10);
 
 -- --------------------------------------------------------
 
@@ -325,10 +337,11 @@ CREATE TABLE `uporabniki` (
 INSERT INTO `uporabniki` (`ID_uporabnika`, `uporabnisko_ime`, `geslo`, `ime`, `priimek`, `email`, `vloga`) VALUES
 (1, 'admin', '$2y$10$.GwLxLmV5tETQe9.eTjlx.qewTQtWR4eZrw7rKrU7IUp6PrVuw5kO', 'Ana', 'Novak', 'admin@example.com', 'administrator'),
 (2, 'ucitelj1', '$2y$10$MCTk/syazEDoD0.pU/weV.OEzbQdbFJyUpIcqzXAX8uOYXf.8i.f2', 'Matej', 'Kovač', 'matej.kovac@example.com', 'učitelj'),
-(3, 'ucitelj2', '$2y$10$iTHlEzhhHuN.0BY/6wjplO2TkOcpphOCA7WbxZXGray.axjk6AaGu', 'Simona', 'Horvat', 'simona.horvat@example.com', 'učitelj'),
-(4, 'ucenec1', '$2y$10$HoTQC6HMGIMjuuqVlS3cLOTPYDgPF1X1wErcx/6GpuTy.l7omRFmu', 'Luka', 'Zupan', 'luka.zupan@example.com', 'učenec'),
+(4, 'ucenec1', '$2y$10$HoTQC6HMGIMjuuqVlS3cLOTPYDgPF1X1wErcx/6GpuTy.l7omRFmu', 'Luk', 'Zupan', 'luka.zupan@example.com', 'učenec'),
 (5, 'ucenec2', '$2y$10$NP0EEb6Xv1ICkCRSTFM1.eLjsPv7BE/gDwL23QwUOomOJGZ2uldJy', 'Nina', 'Petek', 'nina.petek@example.com', 'učenec'),
-(6, 'mihazvegler', '$2y$10$YSKzXJBh92fUj4Rlg.cRz.LwEU1C3arUZlD6pbZWolBPvcK3/xIHy', 'Miha', 'Žvegler', 'miha.zvegler1@gmail.com', 'učenec');
+(6, 'mihazvegler', '$2y$10$YSKzXJBh92fUj4Rlg.cRz.LwEU1C3arUZlD6pbZWolBPvcK3/xIHy', 'Miha', 'Žvegler', 'miha.zvegler1@gmail.com', 'učenec'),
+(8, 'ucitelj5', '$2y$10$TBFxKdCEHHZD/i893lMYje8gFFI7pP7l3Xm1tDEP3DIetnFEoawFS', 'Matic', 'Holobar', 'matic.holobar@primer.com', 'učitelj'),
+(9, 'ucenec5', '$2y$10$0u9qeGKK5l1epz7TT6w9he1RZV0/Unqyto5ZEqazpj5lm.OzSiOi2', 'Žiga', 'Plahuta', 'zigi@plahi.com', 'učenec');
 
 --
 -- Indeksi zavrženih tabel
@@ -437,7 +450,7 @@ ALTER TABLE `uporabniki`
 -- AUTO_INCREMENT tabele `gradiva`
 --
 ALTER TABLE `gradiva`
-  MODIFY `ID_gradiva` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+  MODIFY `ID_gradiva` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=20;
 
 --
 -- AUTO_INCREMENT tabele `komentarji_gradiva`
@@ -449,37 +462,37 @@ ALTER TABLE `komentarji_gradiva`
 -- AUTO_INCREMENT tabele `komentarji_naloge`
 --
 ALTER TABLE `komentarji_naloge`
-  MODIFY `ID_komentarja` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `ID_komentarja` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
 
 --
 -- AUTO_INCREMENT tabele `naloge`
 --
 ALTER TABLE `naloge`
-  MODIFY `ID_naloge` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+  MODIFY `ID_naloge` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
 
 --
 -- AUTO_INCREMENT tabele `naloge_predmet`
 --
 ALTER TABLE `naloge_predmet`
-  MODIFY `ID_naloge_predmet` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `ID_naloge_predmet` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
 
 --
 -- AUTO_INCREMENT tabele `predmeti`
 --
 ALTER TABLE `predmeti`
-  MODIFY `ID_predmeta` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+  MODIFY `ID_predmeta` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
 
 --
 -- AUTO_INCREMENT tabele `razredi`
 --
 ALTER TABLE `razredi`
-  MODIFY `ID_razreda` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+  MODIFY `ID_razreda` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=14;
 
 --
 -- AUTO_INCREMENT tabele `uporabniki`
 --
 ALTER TABLE `uporabniki`
-  MODIFY `ID_uporabnika` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+  MODIFY `ID_uporabnika` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
 
 --
 -- Omejitve tabel za povzetek stanja
