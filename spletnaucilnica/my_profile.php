@@ -9,6 +9,7 @@ if (!isset($_SESSION['user_id'])) {
 }
 
 $user_id = $_SESSION['user_id'];
+$role = $_SESSION['role'];
 
 // Pridobimo trenutne podatke uporabnika
 $stmt = $conn->prepare("SELECT uporabnisko_ime, ime, priimek, email FROM uporabniki WHERE ID_uporabnika = ?");
@@ -18,6 +19,7 @@ $result = $stmt->get_result();
 $user = $result->fetch_assoc();
 
 if (isset($_POST['update_profile'])) {
+    $uporabnisko_ime = $conn->real_escape_string($_POST['uporabnisko_ime']);
     $ime = $conn->real_escape_string($_POST['ime']);
     $priimek = $conn->real_escape_string($_POST['priimek']);
     $email = $conn->real_escape_string($_POST['email']);
@@ -39,8 +41,8 @@ if (isset($_POST['update_profile'])) {
             if ($novo_geslo == $potrdi_geslo) {
                 $hashed_password = password_hash($novo_geslo, PASSWORD_DEFAULT);
                 // Posodobimo podatke z novim geslom
-                $stmt = $conn->prepare("UPDATE uporabniki SET ime = ?, priimek = ?, email = ?, geslo = ? WHERE ID_uporabnika = ?");
-                $stmt->bind_param("ssssi", $ime, $priimek, $email, $hashed_password, $user_id);
+                $stmt = $conn->prepare("UPDATE uporabniki SET uporabnisko_ime = ?, ime = ?, priimek = ?, email = ?, geslo = ? WHERE ID_uporabnika = ?");
+                $stmt->bind_param("sssssi", $uporabnisko_ime, $ime, $priimek, $email, $hashed_password, $user_id);
             } else {
                 $error = "Novo geslo in potrditev gesla se ne ujemata.";
             }
@@ -49,8 +51,8 @@ if (isset($_POST['update_profile'])) {
         }
     } else {
         // Posodobimo podatke brez spreminjanja gesla
-        $stmt = $conn->prepare("UPDATE uporabniki SET ime = ?, priimek = ?, email = ? WHERE ID_uporabnika = ?");
-        $stmt->bind_param("sssi", $ime, $priimek, $email, $user_id);
+        $stmt = $conn->prepare("UPDATE uporabniki SET uporabnisko_ime = ?, ime = ?, priimek = ?, email = ? WHERE ID_uporabnika = ?");
+        $stmt->bind_param("ssssi", $uporabnisko_ime, $ime, $priimek, $email, $user_id);
     }
 
     if (!isset($error) && $stmt->execute()) {
@@ -60,7 +62,7 @@ if (isset($_POST['update_profile'])) {
     }
 }
 
-$current_page = basename($_SERVER['PHP_SELF']); // Pridobi trenutno stran
+$current_page = basename($_SERVER['PHP_SELF']);
 
 ?>
 <!DOCTYPE html>
@@ -89,7 +91,12 @@ $current_page = basename($_SERVER['PHP_SELF']); // Pridobi trenutno stran
             <ul>
                 <li><a href="dashboard.php" class="<?= ($current_page == 'dashboard.php') ? 'active' : '' ?>">Nadzorna plošča</a></li>
                 <li><a href="my_profile.php" class="<?= ($current_page == 'my_profile.php') ? 'active' : '' ?>">Moj profil</a></li>
-                <li><a href="my_assignments.php" class="<?= ($current_page == 'my_assignments.php') ? 'active' : '' ?>">Moje naloge</a></li>
+                <?php if ($role == 'učitelj'): ?>
+                    <li><a href="upload_materials.php" class="<?= ($current_page == 'upload_materials.php') ? 'active' : '' ?>">Nalaganje gradiv</a></li>
+                    <li><a href="view_submissions.php" class="<?= ($current_page == 'view_submissions.php') ? 'active' : '' ?>">Oddane naloge</a></li>
+                <?php elseif ($role == 'učenec'): ?>
+                    <li><a href="my_assignments.php" class="<?= ($current_page == 'my_assignments.php') ? 'active' : '' ?>">Moje naloge</a></li>
+                <?php endif; ?>
             </ul>
         </div>
 
@@ -102,7 +109,7 @@ $current_page = basename($_SERVER['PHP_SELF']); // Pridobi trenutno stran
             ?>
             <form action="my_profile.php" method="post">
                 <label>Uporabniško ime:</label>
-                <input type="text" name="uporabnisko_ime" value="<?php echo htmlspecialchars($user['uporabnisko_ime']); ?>" disabled><br>
+                <input type="text" name="uporabnisko_ime" value="<?php echo htmlspecialchars($user['uporabnisko_ime']); ?>" required><br>
                 <label>Ime:</label>
                 <input type="text" name="ime" value="<?php echo htmlspecialchars($user['ime']); ?>" required><br>
                 <label>Priimek:</label>
