@@ -12,7 +12,7 @@ $vloga = $_SESSION['role'];
 $user_id = $_SESSION['user_id'];
 $predmet_id = intval($_GET['id']);
 
-// Preverimo, ali ima uporabnik dostop do tega predmeta
+// Check if user has access to this subject
 $has_access = false;
 if ($vloga == 'učitelj') {
     $stmt = $conn->prepare("SELECT * FROM ucitelji_predmeti_razredi WHERE ID_ucitelja = ? AND ID_predmeta = ?");
@@ -33,25 +33,46 @@ if ($vloga == 'učitelj') {
 }
 
 if (!$has_access) {
-    // Uporabnik nima dostopa do tega predmeta
     header("Location: dashboard.php");
     exit();
 }
 
-// Pridobimo podatke o predmetu
+// Fetch subject data
 $stmt = $conn->prepare("SELECT * FROM predmeti WHERE ID_predmeta = ?");
 $stmt->bind_param("i", $predmet_id);
 $stmt->execute();
 $predmet = $stmt->get_result()->fetch_assoc();
 
-// Obdelava nalaganja gradiva (če je učitelj)
+// Delete material if requested by the teacher
+if ($vloga == 'učitelj' && isset($_GET['delete_material'])) {
+    $material_id = intval($_GET['delete_material']);
+    $stmt = $conn->prepare("DELETE FROM gradiva WHERE ID_gradiva = ? AND ID_ucitelja = ?");
+    $stmt->bind_param("ii", $material_id, $user_id);
+    if ($stmt->execute()) {
+        $success_material = "Gradivo je bilo uspešno izbrisano.";
+    } else {
+        $error_material = "Napaka pri brisanju gradiva: " . $conn->error;
+    }
+}
+
+// Delete assignment if requested by the teacher
+if ($vloga == 'učitelj' && isset($_GET['delete_assignment'])) {
+    $assignment_id = intval($_GET['delete_assignment']);
+    $stmt = $conn->prepare("DELETE FROM naloge_predmet WHERE ID_naloge_predmet = ? AND ID_predmeta = ?");
+    $stmt->bind_param("ii", $assignment_id, $predmet_id);
+    if ($stmt->execute()) {
+        $success_assignment = "Naloga je bila uspešno izbrisana.";
+    } else {
+        $error_assignment = "Napaka pri brisanju naloge: " . $conn->error;
+    }
+}
+
+// Handle material upload
 if ($vloga == 'učitelj' && isset($_POST['upload_material'])) {
     $naslov_gradiva = $conn->real_escape_string($_POST['naslov_gradiva']);
-    $opis_gradiva = $conn->real_escape_string($_POST['opis_gradiva']);
     $datoteka_gradiva = $_FILES['datoteka_gradiva']['name'];
     $target_dir = "uploads/materials/";
 
-    // Preverimo in ustvarimo mapo, če ne obstaja
     if (!file_exists($target_dir)) {
         mkdir($target_dir, 0777, true);
     }
@@ -59,10 +80,8 @@ if ($vloga == 'učitelj' && isset($_POST['upload_material'])) {
     $target_file = $target_dir . basename($datoteka_gradiva);
 
     if (move_uploaded_file($_FILES['datoteka_gradiva']['tmp_name'], $target_file)) {
-        // Vstavimo gradivo v bazo in vključimo ID učitelja
-        $stmt = $conn->prepare("INSERT INTO gradiva (ID_predmeta, ID_ucitelja, naslov_gradiva, opis, pot_do_datoteke) VALUES (?, ?, ?, ?, ?)");
-        $stmt->bind_param("iisss", $predmet_id, $user_id, $naslov_gradiva, $opis_gradiva, $target_file);
-
+        $stmt = $conn->prepare("INSERT INTO gradiva (ID_predmeta, ID_ucitelja, naslov_gradiva, pot_do_datoteke) VALUES (?, ?, ?, ?)");
+        $stmt->bind_param("iiss", $predmet_id, $user_id, $naslov_gradiva, $target_file);
         if ($stmt->execute()) {
             $success_material = "Gradivo je bilo uspešno naloženo.";
         } else {
@@ -73,7 +92,7 @@ if ($vloga == 'učitelj' && isset($_POST['upload_material'])) {
     }
 }
 
-// Obdelava dodajanja nove naloge (če je učitelj)
+// Handle assignment addition
 if ($vloga == 'učitelj' && isset($_POST['add_assignment'])) {
     $naslov_naloge = $conn->real_escape_string($_POST['naslov_naloge']);
     $opis_naloge = $conn->real_escape_string($_POST['opis_naloge']);
@@ -81,20 +100,15 @@ if ($vloga == 'učitelj' && isset($_POST['add_assignment'])) {
     $datoteka_naloge = $_FILES['datoteka_naloge']['name'];
     $target_dir = "uploads/assignments/";
 
-    // Preverimo in ustvarimo mapo, če ne obstaja
     if (!file_exists($target_dir)) {
         mkdir($target_dir, 0777, true);
     }
 
     $target_file = $target_dir . basename($datoteka_naloge);
-    $uploadOk = true;
 
-    // Premakni datoteko na strežnik
     if ($datoteka_naloge && move_uploaded_file($_FILES['datoteka_naloge']['tmp_name'], $target_file)) {
-        // Vstavimo nalogo v bazo z lokacijo datoteke
         $stmt = $conn->prepare("INSERT INTO naloge_predmet (ID_predmeta, naslov_naloge, opis, rok_oddaje, pot_do_datoteke) VALUES (?, ?, ?, ?, ?)");
         $stmt->bind_param("issss", $predmet_id, $naslov_naloge, $opis_naloge, $rok_oddaje, $target_file);
-
         if ($stmt->execute()) {
             $success_assignment = "Naloga je bila uspešno dodana.";
         } else {
@@ -105,7 +119,7 @@ if ($vloga == 'učitelj' && isset($_POST['add_assignment'])) {
     }
 }
 
-// Obdelava odhoda učenca iz predmeta
+// Student leaves subject
 if ($vloga == 'učenec' && isset($_POST['leave_subject'])) {
     $stmt = $conn->prepare("DELETE FROM ucenci_predmeti WHERE ID_ucenca = ? AND ID_predmeta = ?");
     $stmt->bind_param("ii", $user_id, $predmet_id);
@@ -118,7 +132,7 @@ if ($vloga == 'učenec' && isset($_POST['leave_subject'])) {
     }
 }
 
-$current_page = basename($_SERVER['PHP_SELF']); // Pridobi trenutno stran
+$current_page = basename($_SERVER['PHP_SELF']);
 ?>
 
 <!DOCTYPE html>
@@ -128,51 +142,61 @@ $current_page = basename($_SERVER['PHP_SELF']); // Pridobi trenutno stran
     <title><?php echo htmlspecialchars($predmet['ime_predmeta']); ?></title>
     <link rel="stylesheet" href="style.css">
     <style>
-        /* Dodatni slogi za zavihke */
+        /* Enhanced styling */
         .tabs {
-            overflow: hidden;
-            background-color: #f1f1f1;
+            display: flex;
+            background-color: #eee;
         }
-
         .tabs button {
-            background-color: inherit;
-            float: left;
+            background-color: #007acc;
+            color: white;
             border: none;
-            outline: none;
+            padding: 14px 20px;
             cursor: pointer;
-            padding: 14px 16px;
-            transition: 0.3s;
+            transition: background-color 0.3s ease;
+            margin-right: 10px;
+            border-radius: 4px;
         }
-
         .tabs button:hover {
-            background-color: #ddd;
+            background-color: #005f99;
         }
-
         .tabs button.active {
-            background-color: #ccc;
+            background-color: #005f99;
         }
-
         .tabcontent {
             display: none;
-            padding: 6px 12px;
+            padding: 20px;
+            border-top: none;
+        }
+        .form-container button {
+            background-color: #007acc;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        .form-container button:hover {
+            background-color: #005f99;
         }
     </style>
 </head>
 <body>
-    <!-- Zgornja naslovna vrstica -->
+    <!-- Header -->
     <div class="header">
         <div class="logo">
-        <a href="dashboard.php" style="display: flex; align-items: center; text-decoration: none; color: inherit;">
-            <img src="logo2.png" alt="Logo">
-            <h2>Spletna učilnica</h2>
-        </a>
+            <a href="dashboard.php" style="display: flex; align-items: center; text-decoration: none; color: inherit;">
+                <img src="logo2.png" alt="Logo">
+                <h2>Spletna učilnica</h2>
+            </a>
         </div>
         <a href="logout.php" class="logout">Odjava</a>
     </div>
 
-    <!-- Glavni vsebinski del -->
+    <!-- Main Content with Sidebar -->
     <div class="main-content">
-        <!-- Levi stranski meni -->
+        <!-- Sidebar -->
         <div class="sidebar">
             <ul>
                 <?php if ($vloga == 'učitelj'): ?>
@@ -187,32 +211,21 @@ $current_page = basename($_SERVER['PHP_SELF']); // Pridobi trenutno stran
             </ul>
         </div>
 
-        <!-- Vsebina -->
+        <!-- Content Area -->
         <div class="content">
             <h3><?php echo htmlspecialchars($predmet['ime_predmeta']); ?></h3>
             <p><?php echo nl2br(htmlspecialchars($predmet['opis_predmeta'])); ?></p>
 
-            <!-- Prikaz možnosti za zapustitev učilnice za učenca -->
-            <?php if ($vloga == 'učenec'): ?>
-                <form action="subject.php?id=<?php echo $predmet_id; ?>" method="post" style="margin-bottom: 20px;">
-                    <?php if (isset($error_leave)) echo "<p style='color:red;'>$error_leave</p>"; ?>
-                    <button type="submit" name="leave_subject" onclick="return confirm('Ali ste prepričani, da želite zapustiti ta predmet?');">
-                        Izpis iz predmeta
-                    </button>
-                </form>
-            <?php endif; ?>
-
-            <!-- Zavihki -->
+            <!-- Tabs for Materials and Assignments -->
             <div class="tabs">
                 <button class="tablinks" onclick="openTab(event, 'Gradiva')" id="defaultOpen">Gradiva</button>
                 <button class="tablinks" onclick="openTab(event, 'Naloge')">Naloge</button>
             </div>
 
-            <!-- Vsebina zavihkov -->
+            <!-- Materials Section -->
             <div id="Gradiva" class="tabcontent">
                 <h4>Gradiva</h4>
                 <?php
-                // Pridobimo gradiva za ta predmet
                 $stmt = $conn->prepare("SELECT * FROM gradiva WHERE ID_predmeta = ?");
                 $stmt->bind_param("i", $predmet_id);
                 $stmt->execute();
@@ -227,6 +240,9 @@ $current_page = basename($_SERVER['PHP_SELF']); // Pridobi trenutno stran
                                     <?php echo htmlspecialchars($gradivo['naslov_gradiva']); ?>
                                 </a>
                                 <span>(Objavljeno: <?php echo date('d.m.Y', strtotime($gradivo['datum_objave'])); ?>)</span>
+                                <?php if ($vloga == 'učitelj'): ?>
+                                    <a href="subject.php?id=<?php echo $predmet_id; ?>&delete_material=<?php echo $gradivo['ID_gradiva']; ?>" onclick="return confirm('Ali ste prepričani, da želite izbrisati to gradivo?');" style="color:red;">Izbriši</a>
+                                <?php endif; ?>
                             </li>
                         <?php endwhile; ?>
                     </ul>
@@ -236,15 +252,11 @@ $current_page = basename($_SERVER['PHP_SELF']); // Pridobi trenutno stran
 
                 <?php if ($vloga == 'učitelj'): ?>
                     <h4>Naloži novo gradivo</h4>
-                    <?php
-                    if (isset($success_material)) echo "<p style='color:green;'>$success_material</p>";
-                    if (isset($error_material)) echo "<p style='color:red;'>$error_material</p>";
-                    ?>
+                    <?php if (isset($success_material)) echo "<p style='color:green;'>$success_material</p>"; ?>
+                    <?php if (isset($error_material)) echo "<p style='color:red;'>$error_material</p>"; ?>
                     <form action="subject.php?id=<?php echo $predmet_id; ?>" method="post" enctype="multipart/form-data" class="form-container">
                         <label>Naslov gradiva:</label>
                         <input type="text" name="naslov_gradiva" required><br>
-                        <label>Opis (neobvezno):</label>
-                        <textarea name="opis_gradiva"></textarea><br>
                         <label>Izberite datoteko:</label>
                         <input type="file" name="datoteka_gradiva" required><br>
                         <button type="submit" name="upload_material">Naloži gradivo</button>
@@ -252,10 +264,10 @@ $current_page = basename($_SERVER['PHP_SELF']); // Pridobi trenutno stran
                 <?php endif; ?>
             </div>
 
+            <!-- Assignments Section -->
             <div id="Naloge" class="tabcontent">
                 <h4>Naloge</h4>
                 <?php
-                // Pridobimo naloge za ta predmet
                 $stmt = $conn->prepare("SELECT * FROM naloge_predmet WHERE ID_predmeta = ?");
                 $stmt->bind_param("i", $predmet_id);
                 $stmt->execute();
@@ -270,6 +282,9 @@ $current_page = basename($_SERVER['PHP_SELF']); // Pridobi trenutno stran
                                     <?php echo htmlspecialchars($naloga['naslov_naloge']); ?>
                                 </a>
                                 <span>(Rok oddaje: <?php echo date('d.m.Y H:i', strtotime($naloga['rok_oddaje'])); ?>)</span>
+                                <?php if ($vloga == 'učitelj'): ?>
+                                    <a href="subject.php?id=<?php echo $predmet_id; ?>&delete_assignment=<?php echo $naloga['ID_naloge_predmet']; ?>" onclick="return confirm('Ali ste prepričani, da želite izbrisati to nalogo?');" style="color:red;">Izbriši</a>
+                                <?php endif; ?>
                             </li>
                         <?php endwhile; ?>
                     </ul>
@@ -279,10 +294,8 @@ $current_page = basename($_SERVER['PHP_SELF']); // Pridobi trenutno stran
 
                 <?php if ($vloga == 'učitelj'): ?>
                     <h4>Dodaj novo nalogo</h4>
-                    <?php
-                    if (isset($success_assignment)) echo "<p style='color:green;'>$success_assignment</p>";
-                    if (isset($error_assignment)) echo "<p style='color:red;'>$error_assignment</p>";
-                    ?>
+                    <?php if (isset($success_assignment)) echo "<p style='color:green;'>$success_assignment</p>"; ?>
+                    <?php if (isset($error_assignment)) echo "<p style='color:red;'>$error_assignment</p>"; ?>
                     <form action="subject.php?id=<?php echo $predmet_id; ?>" method="post" enctype="multipart/form-data" class="form-container">
                         <label>Naslov naloge:</label>
                         <input type="text" name="naslov_naloge" required><br>
@@ -302,25 +315,17 @@ $current_page = basename($_SERVER['PHP_SELF']); // Pridobi trenutno stran
     <script>
         function openTab(evt, tabName) {
             var i, tabcontent, tablinks;
-
-            // Skrijemo vse zavihke
             tabcontent = document.getElementsByClassName("tabcontent");
             for (i = 0; i < tabcontent.length; i++) {
                 tabcontent[i].style.display = "none";
             }
-
-            // Odstranimo aktivni razred iz vseh zavihkov
             tablinks = document.getElementsByClassName("tablinks");
             for (i = 0; i < tablinks.length; i++) {
                 tablinks[i].className = tablinks[i].className.replace(" active", "");
             }
-
-            // Prikažemo izbrani zavihek in ga označimo kot aktivnega
             document.getElementById(tabName).style.display = "block";
             evt.currentTarget.className += " active";
         }
-
-        // Privzeto odpremo prvi zavihek
         document.getElementById("defaultOpen").click();
     </script>
 </body>
