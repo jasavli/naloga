@@ -11,6 +11,23 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] != 'administrator') {
 
 $action = isset($_GET['action']) ? $_GET['action'] : 'list';
 
+// Pridobimo seznam predmetov in razredov
+$stmt = $conn->prepare("SELECT * FROM predmeti");
+$stmt->execute();
+$predmeti = $stmt->get_result();
+$all_predmeti = [];
+while ($row = $predmeti->fetch_assoc()) {
+    $all_predmeti[] = $row;
+}
+
+$stmt = $conn->prepare("SELECT * FROM razredi");
+$stmt->execute();
+$razredi = $stmt->get_result();
+$all_razredi = [];
+while ($row = $razredi->fetch_assoc()) {
+    $all_razredi[] = $row;
+}
+
 // Dodajanje novega učitelja
 if ($action == 'add' && isset($_POST['add_teacher'])) {
     $uporabnisko_ime = $conn->real_escape_string($_POST['uporabnisko_ime']);
@@ -19,6 +36,7 @@ if ($action == 'add' && isset($_POST['add_teacher'])) {
     $priimek = $conn->real_escape_string($_POST['priimek']);
     $email = $conn->real_escape_string($_POST['email']);
     $predmeti = isset($_POST['predmeti']) ? $_POST['predmeti'] : [];
+    $razredi = isset($_POST['razredi']) ? $_POST['razredi'] : [];
 
     // Preverimo, ali uporabniško ime ali email že obstaja
     $stmt = $conn->prepare("SELECT * FROM uporabniki WHERE uporabnisko_ime = ? OR email = ?");
@@ -33,11 +51,13 @@ if ($action == 'add' && isset($_POST['add_teacher'])) {
         $stmt->bind_param("sssss", $uporabnisko_ime, $geslo, $ime, $priimek, $email);
         if ($stmt->execute()) {
             $ID_ucitelja = $stmt->insert_id;
-            // Dodelimo predmete učitelju
+            // Dodelimo predmete in razrede učitelju
             foreach ($predmeti as $ID_predmeta) {
-                $stmt = $conn->prepare("INSERT INTO ucitelji_predmeti (ID_ucitelja, ID_predmeta) VALUES (?, ?)");
-                $stmt->bind_param("ii", $ID_ucitelja, $ID_predmeta);
-                $stmt->execute();
+                foreach ($razredi as $ID_razreda) {
+                    $stmt = $conn->prepare("INSERT INTO ucitelji_predmeti_razredi (ID_ucitelja, ID_predmeta, ID_razreda) VALUES (?, ?, ?)");
+                    $stmt->bind_param("iii", $ID_ucitelja, $ID_predmeta, $ID_razreda);
+                    $stmt->execute();
+                }
             }
             $success = "Učitelj uspešno dodan.";
         } else {
@@ -54,21 +74,24 @@ if ($action == 'edit' && isset($_POST['edit_teacher'])) {
     $priimek = $conn->real_escape_string($_POST['priimek']);
     $email = $conn->real_escape_string($_POST['email']);
     $predmeti = isset($_POST['predmeti']) ? $_POST['predmeti'] : [];
+    $razredi = isset($_POST['razredi']) ? $_POST['razredi'] : [];
 
     // Posodobimo podatke o učitelju
     $stmt = $conn->prepare("UPDATE uporabniki SET uporabnisko_ime = ?, ime = ?, priimek = ?, email = ? WHERE ID_uporabnika = ?");
     $stmt->bind_param("ssssi", $uporabnisko_ime, $ime, $priimek, $email, $ID_ucitelja);
     if ($stmt->execute()) {
-        // Posodobimo dodeljene predmete
+        // Posodobimo dodeljene predmete in razrede
         // Najprej izbrišemo obstoječe dodelitve
-        $stmt = $conn->prepare("DELETE FROM ucitelji_predmeti WHERE ID_ucitelja = ?");
+        $stmt = $conn->prepare("DELETE FROM ucitelji_predmeti_razredi WHERE ID_ucitelja = ?");
         $stmt->bind_param("i", $ID_ucitelja);
         $stmt->execute();
         // Nato dodamo nove dodelitve
         foreach ($predmeti as $ID_predmeta) {
-            $stmt = $conn->prepare("INSERT INTO ucitelji_predmeti (ID_ucitelja, ID_predmeta) VALUES (?, ?)");
-            $stmt->bind_param("ii", $ID_ucitelja, $ID_predmeta);
-            $stmt->execute();
+            foreach ($razredi as $ID_razreda) {
+                $stmt = $conn->prepare("INSERT INTO ucitelji_predmeti_razredi (ID_ucitelja, ID_predmeta, ID_razreda) VALUES (?, ?, ?)");
+                $stmt->bind_param("iii", $ID_ucitelja, $ID_predmeta, $ID_razreda);
+                $stmt->execute();
+            }
         }
         $success = "Učitelj uspešno posodobljen.";
     } else {
@@ -79,6 +102,12 @@ if ($action == 'edit' && isset($_POST['edit_teacher'])) {
 // Brisanje učitelja
 if ($action == 'delete' && isset($_GET['id'])) {
     $ID_ucitelja = intval($_GET['id']);
+    // Najprej izbrišemo vse dodelitve učitelja
+    $stmt = $conn->prepare("DELETE FROM ucitelji_predmeti_razredi WHERE ID_ucitelja = ?");
+    $stmt->bind_param("i", $ID_ucitelja);
+    $stmt->execute();
+
+    // Nato izbrišemo učitelja
     $stmt = $conn->prepare("DELETE FROM uporabniki WHERE ID_uporabnika = ?");
     $stmt->bind_param("i", $ID_ucitelja);
     if ($stmt->execute()) {
@@ -92,15 +121,6 @@ if ($action == 'delete' && isset($_GET['id'])) {
 $stmt = $conn->prepare("SELECT * FROM uporabniki WHERE vloga = 'učitelj'");
 $stmt->execute();
 $ucitelji = $stmt->get_result();
-
-// Pridobimo seznam predmetov
-$stmt = $conn->prepare("SELECT * FROM predmeti");
-$stmt->execute();
-$predmeti = $stmt->get_result();
-$all_predmeti = [];
-while ($row = $predmeti->fetch_assoc()) {
-    $all_predmeti[] = $row;
-}
 ?>
 <!DOCTYPE html>
 <html lang="sl">
@@ -130,6 +150,7 @@ while ($row = $predmeti->fetch_assoc()) {
                 <li><a href="manage_subjects.php">Upravljanje predmetov</a></li>
                 <li><a href="manage_teachers.php" class="active">Upravljanje učiteljev</a></li>
                 <li><a href="manage_students.php">Upravljanje učencev</a></li>
+                <li><a href="manage_classes.php">Upravljanje razredov</a></li>
                 <li><a href="logout.php">Odjava</a></li>
             </ul>
         </div>
@@ -151,28 +172,15 @@ while ($row = $predmeti->fetch_assoc()) {
                         <th>Ime</th>
                         <th>Priimek</th>
                         <th>Email</th>
-                        <th>Predmeti</th>
                         <th>Akcije</th>
                     </tr>
                     <?php while ($ucitelj = $ucitelji->fetch_assoc()): ?>
-                        <?php
-                        // Pridobimo predmete, ki jih učitelj poučuje
-                        $stmt = $conn->prepare("SELECT p.ime_predmeta FROM predmeti p INNER JOIN ucitelji_predmeti up ON p.ID_predmeta = up.ID_predmeta WHERE up.ID_ucitelja = ?");
-                        $stmt->bind_param("i", $ucitelj['ID_uporabnika']);
-                        $stmt->execute();
-                        $predmeti_ucitelja = $stmt->get_result();
-                        $predmeti_list = [];
-                        while ($predmet = $predmeti_ucitelja->fetch_assoc()) {
-                            $predmeti_list[] = $predmet['ime_predmeta'];
-                        }
-                        ?>
                         <tr>
                             <td><?php echo $ucitelj['ID_uporabnika']; ?></td>
                             <td><?php echo htmlspecialchars($ucitelj['uporabnisko_ime']); ?></td>
                             <td><?php echo htmlspecialchars($ucitelj['ime']); ?></td>
                             <td><?php echo htmlspecialchars($ucitelj['priimek']); ?></td>
                             <td><?php echo htmlspecialchars($ucitelj['email']); ?></td>
-                            <td><?php echo implode(', ', $predmeti_list); ?></td>
                             <td>
                                 <a href="manage_teachers.php?action=edit&id=<?php echo $ucitelj['ID_uporabnika']; ?>">Uredi</a> |
                                 <a href="manage_teachers.php?action=delete&id=<?php echo $ucitelj['ID_uporabnika']; ?>" onclick="return confirm('Ali ste prepričani, da želite izbrisati tega učitelja?')">Izbriši</a>
@@ -200,6 +208,13 @@ while ($row = $predmeti->fetch_assoc()) {
                             <?php echo htmlspecialchars($predmet['ime_predmeta']); ?>
                         </div>
                     <?php endforeach; ?>
+                    <label>Razredi:</label>
+                    <?php foreach ($all_razredi as $razred): ?>
+                        <div>
+                            <input type="checkbox" name="razredi[]" value="<?php echo $razred['ID_razreda']; ?>">
+                            <?php echo htmlspecialchars($razred['ime_razreda']); ?>
+                        </div>
+                    <?php endforeach; ?>
                     <button type="submit" name="add_teacher">Dodaj učitelja</button>
                     <a href="manage_teachers.php" class="button">Prekliči</a>
                 </form>
@@ -211,14 +226,16 @@ while ($row = $predmeti->fetch_assoc()) {
                 $stmt->execute();
                 $ucitelj = $stmt->get_result()->fetch_assoc();
 
-                // Pridobimo predmete, ki jih učitelj poučuje
-                $stmt = $conn->prepare("SELECT ID_predmeta FROM ucitelji_predmeti WHERE ID_ucitelja = ?");
+                // Pridobimo predmete in razrede, ki jih učitelj poučuje
+                $stmt = $conn->prepare("SELECT ID_predmeta, ID_razreda FROM ucitelji_predmeti_razredi WHERE ID_ucitelja = ?");
                 $stmt->bind_param("i", $ID_ucitelja);
                 $stmt->execute();
                 $result = $stmt->get_result();
                 $predmeti_ucitelja = [];
+                $razredi_ucitelja = [];
                 while ($row = $result->fetch_assoc()) {
                     $predmeti_ucitelja[] = $row['ID_predmeta'];
+                    $razredi_ucitelja[] = $row['ID_razreda'];
                 }
                 ?>
                 <h4>Uredi učitelja</h4>
@@ -237,6 +254,13 @@ while ($row = $predmeti->fetch_assoc()) {
                         <div>
                             <input type="checkbox" name="predmeti[]" value="<?php echo $predmet['ID_predmeta']; ?>" <?php if (in_array($predmet['ID_predmeta'], $predmeti_ucitelja)) echo 'checked'; ?>>
                             <?php echo htmlspecialchars($predmet['ime_predmeta']); ?>
+                        </div>
+                    <?php endforeach; ?>
+                    <label>Razredi:</label>
+                    <?php foreach ($all_razredi as $razred): ?>
+                        <div>
+                            <input type="checkbox" name="razredi[]" value="<?php echo $razred['ID_razreda']; ?>" <?php if (in_array($razred['ID_razreda'], $razredi_ucitelja)) echo 'checked'; ?>>
+                            <?php echo htmlspecialchars($razred['ime_razreda']); ?>
                         </div>
                     <?php endforeach; ?>
                     <button type="submit" name="edit_teacher">Posodobi učitelja</button>
