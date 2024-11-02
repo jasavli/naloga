@@ -19,8 +19,8 @@ if ($action == 'add' && isset($_POST['add_student'])) {
     $priimek = $conn->real_escape_string($_POST['priimek']);
     $email = $conn->real_escape_string($_POST['email']);
     $predmeti = isset($_POST['predmeti']) ? $_POST['predmeti'] : [];
+    $ID_razreda = intval($_POST['razred']);
 
-    // Preverimo, ali uporabniško ime ali email že obstaja
     $stmt = $conn->prepare("SELECT * FROM uporabniki WHERE uporabnisko_ime = ? OR email = ?");
     $stmt->bind_param("ss", $uporabnisko_ime, $email);
     $stmt->execute();
@@ -28,17 +28,19 @@ if ($action == 'add' && isset($_POST['add_student'])) {
     if ($result->num_rows > 0) {
         $error = "Uporabniško ime ali email že obstaja.";
     } else {
-        // Vstavimo učenca v bazo
         $stmt = $conn->prepare("INSERT INTO uporabniki (uporabnisko_ime, geslo, ime, priimek, email, vloga) VALUES (?, ?, ?, ?, ?, 'učenec')");
         $stmt->bind_param("sssss", $uporabnisko_ime, $geslo, $ime, $priimek, $email);
         if ($stmt->execute()) {
             $ID_ucenca = $stmt->insert_id;
-            // Dodelimo predmete učencu
             foreach ($predmeti as $ID_predmeta) {
                 $stmt = $conn->prepare("INSERT INTO ucenci_predmeti (ID_ucenca, ID_predmeta) VALUES (?, ?)");
                 $stmt->bind_param("ii", $ID_ucenca, $ID_predmeta);
                 $stmt->execute();
             }
+            $stmt = $conn->prepare("INSERT INTO ucenci_razredi (ID_ucenca, ID_razreda) VALUES (?, ?)");
+            $stmt->bind_param("ii", $ID_ucenca, $ID_razreda);
+            $stmt->execute();
+
             $success = "Učenec uspešno dodan.";
         } else {
             $error = "Napaka pri dodajanju učenca: " . $conn->error;
@@ -54,27 +56,44 @@ if ($action == 'edit' && isset($_POST['edit_student'])) {
     $priimek = $conn->real_escape_string($_POST['priimek']);
     $email = $conn->real_escape_string($_POST['email']);
     $predmeti = isset($_POST['predmeti']) ? $_POST['predmeti'] : [];
+    $ID_razreda = intval($_POST['razred']);
 
-    // Posodobimo podatke o učencu
     $stmt = $conn->prepare("UPDATE uporabniki SET uporabnisko_ime = ?, ime = ?, priimek = ?, email = ? WHERE ID_uporabnika = ?");
     $stmt->bind_param("ssssi", $uporabnisko_ime, $ime, $priimek, $email, $ID_ucenca);
     if ($stmt->execute()) {
-        // Posodobimo dodeljene predmete
-        // Najprej izbrišemo obstoječe dodelitve
+        // Posodobimo predmete
         $stmt = $conn->prepare("DELETE FROM ucenci_predmeti WHERE ID_ucenca = ?");
         $stmt->bind_param("i", $ID_ucenca);
         $stmt->execute();
-        // Nato dodamo nove dodelitve
         foreach ($predmeti as $ID_predmeta) {
             $stmt = $conn->prepare("INSERT INTO ucenci_predmeti (ID_ucenca, ID_predmeta) VALUES (?, ?)");
             $stmt->bind_param("ii", $ID_ucenca, $ID_predmeta);
             $stmt->execute();
         }
+
+        // Preverimo, če učenec že ima dodeljen razred
+        $stmt = $conn->prepare("SELECT * FROM ucenci_razredi WHERE ID_ucenca = ?");
+        $stmt->bind_param("i", $ID_ucenca);
+        $stmt->execute();
+        $result = $stmt->get_result();
+
+        if ($result->num_rows > 0) {
+            // Če razred že obstaja, ga posodobimo
+            $stmt = $conn->prepare("UPDATE ucenci_razredi SET ID_razreda = ? WHERE ID_ucenca = ?");
+            $stmt->bind_param("ii", $ID_razreda, $ID_ucenca);
+        } else {
+            // Če razred ne obstaja, ga dodamo
+            $stmt = $conn->prepare("INSERT INTO ucenci_razredi (ID_ucenca, ID_razreda) VALUES (?, ?)");
+            $stmt->bind_param("ii", $ID_ucenca, $ID_razreda);
+        }
+        $stmt->execute();
+
         $success = "Učenec uspešno posodobljen.";
     } else {
         $error = "Napaka pri posodabljanju učenca: " . $conn->error;
     }
 }
+
 
 // Brisanje učenca
 if ($action == 'delete' && isset($_GET['id'])) {
@@ -102,7 +121,16 @@ while ($row = $predmeti->fetch_assoc()) {
     $all_predmeti[] = $row;
 }
 
-$current_page = basename($_SERVER['PHP_SELF']); // Pridobi trenutno stran
+// Pridobimo seznam razredov
+$stmt = $conn->prepare("SELECT * FROM razredi");
+$stmt->execute();
+$razredi = $stmt->get_result();
+$all_razredi = [];
+while ($row = $razredi->fetch_assoc()) {
+    $all_razredi[] = $row;
+}
+
+$current_page = basename($_SERVER['PHP_SELF']);
 ?>
 <!DOCTYPE html>
 <html lang="sl">
@@ -112,7 +140,6 @@ $current_page = basename($_SERVER['PHP_SELF']); // Pridobi trenutno stran
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <!-- Zgornja naslovna vrstica -->
     <div class="header">
         <div class="logo">
             <a href="dashboard.php" style="display: flex; align-items: center; text-decoration: none; color: inherit;">
@@ -123,9 +150,7 @@ $current_page = basename($_SERVER['PHP_SELF']); // Pridobi trenutno stran
         <a href="logout.php" class="logout">Odjava</a>
     </div>
 
-    <!-- Glavni vsebinski del -->
     <div class="main-content">
-        <!-- Levi stranski meni -->
         <div class="sidebar">
             <ul>
                 <li><a href="dashboard.php" class="<?= ($current_page == 'dashboard.php') ? 'active' : '' ?>">Nadzorna plošča</a></li>
@@ -136,7 +161,6 @@ $current_page = basename($_SERVER['PHP_SELF']); // Pridobi trenutno stran
             </ul>
         </div>
 
-        <!-- Vsebina -->
         <div class="content">
             <h3>Upravljanje učencev</h3>
             <?php
@@ -158,7 +182,6 @@ $current_page = basename($_SERVER['PHP_SELF']); // Pridobi trenutno stran
                     </tr>
                     <?php while ($ucenec = $ucenci->fetch_assoc()): ?>
                         <?php
-                        // Pridobimo predmete, ki jih učenec obiskuje
                         $stmt = $conn->prepare("SELECT p.ime_predmeta FROM predmeti p INNER JOIN ucenci_predmeti up ON p.ID_predmeta = up.ID_predmeta WHERE up.ID_ucenca = ?");
                         $stmt->bind_param("i", $ucenec['ID_uporabnika']);
                         $stmt->execute();
@@ -195,6 +218,12 @@ $current_page = basename($_SERVER['PHP_SELF']); // Pridobi trenutno stran
                     <input type="text" name="priimek" required><br>
                     <label>Email:</label>
                     <input type="email" name="email" required><br>
+                    <label>Razred:</label>
+                    <select name="razred" required>
+                        <?php foreach ($all_razredi as $razred): ?>
+                            <option value="<?php echo $razred['ID_razreda']; ?>"><?php echo htmlspecialchars($razred['ime_razreda']); ?></option>
+                        <?php endforeach; ?>
+                    </select><br>
                     <label>Predmeti:</label>
                     <?php foreach ($all_predmeti as $predmet): ?>
                         <div>
@@ -213,7 +242,12 @@ $current_page = basename($_SERVER['PHP_SELF']); // Pridobi trenutno stran
                 $stmt->execute();
                 $ucenec = $stmt->get_result()->fetch_assoc();
 
-                // Pridobimo predmete, ki jih učenec obiskuje
+                $stmt = $conn->prepare("SELECT ID_razreda FROM ucenci_razredi WHERE ID_ucenca = ?");
+                $stmt->bind_param("i", $ID_ucenca);
+                $stmt->execute();
+                $result = $stmt->get_result();
+                $razred_ucenca = $result->fetch_assoc()['ID_razreda'] ?? null; // Privzeta vrednost null, če ni rezultatov
+
                 $stmt = $conn->prepare("SELECT ID_predmeta FROM ucenci_predmeti WHERE ID_ucenca = ?");
                 $stmt->bind_param("i", $ID_ucenca);
                 $stmt->execute();
@@ -234,6 +268,14 @@ $current_page = basename($_SERVER['PHP_SELF']); // Pridobi trenutno stran
                     <input type="text" name="priimek" value="<?php echo htmlspecialchars($ucenec['priimek']); ?>" required><br>
                     <label>Email:</label>
                     <input type="email" name="email" value="<?php echo htmlspecialchars($ucenec['email']); ?>" required><br>
+                    <label>Razred:</label>
+                    <select name="razred" required>
+                        <?php foreach ($all_razredi as $razred): ?>
+                            <option value="<?php echo $razred['ID_razreda']; ?>" <?php if ($razred['ID_razreda'] == $razred_ucenca) echo 'selected'; ?>>
+                                <?php echo htmlspecialchars($razred['ime_razreda']); ?>
+                            </option>
+                        <?php endforeach; ?>
+                    </select><br>
                     <label>Predmeti:</label>
                     <?php foreach ($all_predmeti as $predmet): ?>
                         <div>
