@@ -55,10 +55,10 @@ if (isset($_GET['predmet'])) {
     <!-- Zgornja naslovna vrstica -->
     <div class="header">
         <div class="logo">
-            <a href="dashboard.php" style="display: flex; align-items: center; text-decoration: none; color: inherit;">
-                <img src="logo.png" alt="Logo">
-                <h2>Moja Šola</h2>
-            </a>
+        <a href="dashboard.php" style="display: flex; align-items: center; text-decoration: none; color: inherit;">
+            <img src="logo2.png" alt="Logo">
+            <h2>Spletna učilnica</h2>
+        </a>
         </div>
         <a href="logout.php" class="logout">Odjava</a>
     </div>

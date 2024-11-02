@@ -142,7 +142,7 @@ $current_page = basename($_SERVER['PHP_SELF']); // Pridobi trenutno stran
         <div class="logo">
         <a href="dashboard.php" style="display: flex; align-items: center; text-decoration: none; color: inherit;">
             <img src="logo2.png" alt="Logo">
-            <h2><?php echo $app_name; ?></h2>
+            <h2>Spletna učilnica</h2>
         </a>
         </div>
         <a href="logout.php" class="logout">Odjava</a>
