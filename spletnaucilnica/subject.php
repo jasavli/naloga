@@ -59,9 +59,9 @@ if ($vloga == 'učitelj' && isset($_POST['upload_material'])) {
     $target_file = $target_dir . basename($datoteka_gradiva);
 
     if (move_uploaded_file($_FILES['datoteka_gradiva']['tmp_name'], $target_file)) {
-        // Vstavimo gradivo v bazo
-        $stmt = $conn->prepare("INSERT INTO gradiva (ID_predmeta, naslov_gradiva, opis, pot_do_datoteke) VALUES (?, ?, ?, ?)");
-        $stmt->bind_param("isss", $predmet_id, $naslov_gradiva, $opis_gradiva, $target_file);
+        // Vstavimo gradivo v bazo in vključimo ID učitelja
+        $stmt = $conn->prepare("INSERT INTO gradiva (ID_predmeta, ID_ucitelja, naslov_gradiva, opis, pot_do_datoteke) VALUES (?, ?, ?, ?, ?)");
+        $stmt->bind_param("iisss", $predmet_id, $user_id, $naslov_gradiva, $opis_gradiva, $target_file);
 
         if ($stmt->execute()) {
             $success_material = "Gradivo je bilo uspešno naloženo.";
@@ -102,6 +102,19 @@ if ($vloga == 'učitelj' && isset($_POST['add_assignment'])) {
         }
     } else {
         $error_assignment = "Napaka pri nalaganju datoteke.";
+    }
+}
+
+// Obdelava odhoda učenca iz predmeta
+if ($vloga == 'učenec' && isset($_POST['leave_subject'])) {
+    $stmt = $conn->prepare("DELETE FROM ucenci_predmeti WHERE ID_ucenca = ? AND ID_predmeta = ?");
+    $stmt->bind_param("ii", $user_id, $predmet_id);
+
+    if ($stmt->execute()) {
+        header("Location: dashboard.php?message=left_subject");
+        exit();
+    } else {
+        $error_leave = "Napaka pri zapuščanju predmeta: " . $conn->error;
     }
 }
 ?>
@@ -176,6 +189,16 @@ if ($vloga == 'učitelj' && isset($_POST['add_assignment'])) {
         <div class="content">
             <h3><?php echo htmlspecialchars($predmet['ime_predmeta']); ?></h3>
             <p><?php echo nl2br(htmlspecialchars($predmet['opis_predmeta'])); ?></p>
+
+            <!-- Prikaz možnosti za zapustitev učilnice za učenca -->
+            <?php if ($vloga == 'učenec'): ?>
+                <form action="subject.php?id=<?php echo $predmet_id; ?>" method="post" style="margin-bottom: 20px;">
+                    <?php if (isset($error_leave)) echo "<p style='color:red;'>$error_leave</p>"; ?>
+                    <button type="submit" name="leave_subject" onclick="return confirm('Ali ste prepričani, da želite zapustiti ta predmet?');">
+                        Zapusti učilnico
+                    </button>
+                </form>
+            <?php endif; ?>
 
             <!-- Zavihki -->
             <div class="tabs">
