@@ -1,5 +1,4 @@
 <?php
-// subject.php
 session_start();
 include('config.php');
 
@@ -12,7 +11,6 @@ $vloga = $_SESSION['role'];
 $user_id = $_SESSION['user_id'];
 $predmet_id = intval($_GET['id']);
 
-// Check if user has access to this subject
 $has_access = false;
 if ($vloga == 'učitelj') {
     $stmt = $conn->prepare("SELECT * FROM ucitelji_predmeti_razredi WHERE ID_ucitelja = ? AND ID_predmeta = ?");
@@ -37,18 +35,15 @@ if (!$has_access) {
     exit();
 }
 
-// Fetch subject data
 $stmt = $conn->prepare("SELECT * FROM predmeti WHERE ID_predmeta = ?");
 $stmt->bind_param("i", $predmet_id);
 $stmt->execute();
 $predmet = $stmt->get_result()->fetch_assoc();
 
-// Function to sanitize text and remove trailing newlines
 function sanitize_input($text) {
-    return rtrim($text); // Removes trailing whitespace and newlines
+    return rtrim($text); 
 }
 
-// Delete material if requested by the teacher
 if ($vloga == 'učitelj' && isset($_GET['delete_material'])) {
     $material_id = intval($_GET['delete_material']);
     $stmt = $conn->prepare("DELETE FROM gradiva WHERE ID_gradiva = ? AND ID_ucitelja = ?");
@@ -60,7 +55,6 @@ if ($vloga == 'učitelj' && isset($_GET['delete_material'])) {
     }
 }
 
-// Delete assignment if requested by the teacher
 if ($vloga == 'učitelj' && isset($_GET['delete_assignment'])) {
     $assignment_id = intval($_GET['delete_assignment']);
     $stmt = $conn->prepare("DELETE FROM naloge_predmet WHERE ID_naloge_predmet = ? AND ID_predmeta = ?");
@@ -72,7 +66,6 @@ if ($vloga == 'učitelj' && isset($_GET['delete_assignment'])) {
     }
 }
 
-// Handle material upload
 if ($vloga == 'učitelj' && isset($_POST['upload_material'])) {
     $naslov_gradiva = sanitize_input($conn->real_escape_string($_POST['naslov_gradiva']));
     $datoteka_gradiva = $_FILES['datoteka_gradiva']['name'];
@@ -97,7 +90,6 @@ if ($vloga == 'učitelj' && isset($_POST['upload_material'])) {
     }
 }
 
-// Handle assignment addition
 if ($vloga == 'učitelj' && isset($_POST['add_assignment'])) {
     $naslov_naloge = sanitize_input($conn->real_escape_string($_POST['naslov_naloge']));
     $opis_naloge = sanitize_input($conn->real_escape_string($_POST['opis_naloge']));
@@ -124,7 +116,6 @@ if ($vloga == 'učitelj' && isset($_POST['add_assignment'])) {
     }
 }
 
-// Student leaves subject
 if ($vloga == 'učenec' && isset($_POST['leave_subject'])) {
     $stmt = $conn->prepare("DELETE FROM ucenci_predmeti WHERE ID_ucenca = ? AND ID_predmeta = ?");
     $stmt->bind_param("ii", $user_id, $predmet_id);
@@ -147,7 +138,6 @@ $current_page = basename($_SERVER['PHP_SELF']);
     <title><?php echo htmlspecialchars($predmet['ime_predmeta']); ?></title>
     <link rel="stylesheet" href="style.css">
     <style>
-        /* Enhanced styling */
         .tabs {
             display: flex;
             background-color: #eee;
@@ -195,7 +185,6 @@ $current_page = basename($_SERVER['PHP_SELF']);
     </style>
 </head>
 <body>
-    <!-- Header -->
     <div class="header">
         <div class="logo">
             <a href="dashboard.php" style="display: flex; align-items: center; text-decoration: none; color: inherit;">
@@ -206,9 +195,7 @@ $current_page = basename($_SERVER['PHP_SELF']);
         <a href="logout.php" class="logout">Odjava</a>
     </div>
 
-    <!-- Main Content with Sidebar -->
     <div class="main-content">
-        <!-- Sidebar -->
         <div class="sidebar">
             <ul>
                 <?php if ($vloga == 'učitelj'): ?>
@@ -223,18 +210,15 @@ $current_page = basename($_SERVER['PHP_SELF']);
             </ul>
         </div>
 
-        <!-- Main Content for Materials and Assignments -->
         <div class="content">
             <h3><?php echo htmlspecialchars($predmet['ime_predmeta']); ?></h3>
             <p><?php echo nl2br(htmlspecialchars($predmet['opis_predmeta'])); ?></p>
 
-            <!-- Tabs for Materials and Assignments -->
             <div class="tabs">
                 <button class="tablinks" onclick="openTab(event, 'Gradiva')" id="defaultOpen">Gradiva</button>
                 <button class="tablinks" onclick="openTab(event, 'Naloge')">Naloge</button>
             </div>
 
-            <!-- Materials Section -->
             <div id="Gradiva" class="tabcontent">
                 <h4>Gradiva</h4>
                 <?php
@@ -260,7 +244,6 @@ $current_page = basename($_SERVER['PHP_SELF']);
                 <?php else: ?>
                     <p>Ni gradiv za ta predmet.</p>
                 <?php endif; ?>
-                <!-- Material Upload Form -->
                 <?php if ($vloga == 'učitelj'): ?>
                     <h4>Naloži novo gradivo</h4>
                     <?php if (isset($success_material)) echo "<p style='color:green;'>$success_material</p>"; ?>
@@ -275,7 +258,6 @@ $current_page = basename($_SERVER['PHP_SELF']);
                 <?php endif; ?>
             </div>
 
-            <!-- Assignments Section -->
             <div id="Naloge" class="tabcontent">
                 <h4>Naloge</h4>
                 <?php
@@ -302,7 +284,6 @@ $current_page = basename($_SERVER['PHP_SELF']);
                     <p>Ni nalog za ta predmet.</p>
                 <?php endif; ?>
 
-                <!-- Assignment Form -->
                 <?php if ($vloga == 'učitelj'): ?>
                     <h4>Dodaj novo nalogo</h4>
                     <?php if (isset($success_assignment)) echo "<p style='color:green;'>$success_assignment</p>"; ?>

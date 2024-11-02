@@ -1,9 +1,7 @@
 <?php
-// manage_classes.php
 session_start();
 include('config.php');
 
-// Preverimo, ali je uporabnik administrator
 if (!isset($_SESSION['user_id']) || $_SESSION['role'] != 'administrator') {
     header("Location: index.php");
     exit();
@@ -12,7 +10,6 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] != 'administrator') {
 $action = isset($_GET['action']) ? $_GET['action'] : 'list';
 $class_id = isset($_GET['id']) ? intval($_GET['id']) : 0;
 
-// Dodajanje novega razreda
 if ($action == 'add' && isset($_POST['add_class'])) {
     $ime_razreda = $conn->real_escape_string($_POST['ime_razreda']);
     
@@ -25,7 +22,6 @@ if ($action == 'add' && isset($_POST['add_class'])) {
     }
 }
 
-// Urejanje razreda
 if ($action == 'edit' && isset($_POST['edit_class']) && $class_id > 0) {
     $ime_razreda = $conn->real_escape_string($_POST['ime_razreda']);
     
@@ -33,30 +29,28 @@ if ($action == 'edit' && isset($_POST['edit_class']) && $class_id > 0) {
     $stmt->bind_param("si", $ime_razreda, $class_id);
     if ($stmt->execute()) {
         $success = "Razred uspešno posodobljen.";
-        $action = 'list';  // Po posodobitvi se vrnemo na seznam
+        $action = 'list'; 
     } else {
         $error = "Napaka pri posodabljanju razreda: " . $conn->error;
     }
 }
 
-// Brisanje razreda
 if ($action == 'delete' && $class_id > 0) {
     $stmt = $conn->prepare("DELETE FROM razredi WHERE ID_razreda = ?");
     $stmt->bind_param("i", $class_id);
     if ($stmt->execute()) {
         $success = "Razred uspešno izbrisan.";
-        $action = 'list';  // Po brisanju se vrnemo na seznam
+        $action = 'list';  
     } else {
         $error = "Napaka pri brisanju razreda: " . $conn->error;
     }
 }
 
-// Pridobivanje vseh razredov za seznam
 $stmt = $conn->prepare("SELECT * FROM razredi");
 $stmt->execute();
 $razredi = $stmt->get_result();
 
-$current_page = basename($_SERVER['PHP_SELF']); // Pridobi trenutno stran
+$current_page = basename($_SERVER['PHP_SELF']);
 ?>
 
 <!DOCTYPE html>
@@ -67,7 +61,6 @@ $current_page = basename($_SERVER['PHP_SELF']); // Pridobi trenutno stran
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <!-- Header -->
     <div class="header">
         <div class="logo">
             <a href="dashboard.php" style="display: flex; align-items: center; text-decoration: none; color: inherit;">
@@ -78,9 +71,7 @@ $current_page = basename($_SERVER['PHP_SELF']); // Pridobi trenutno stran
         <a href="logout.php" class="logout">Odjava</a>
     </div>
 
-    <!-- Main content -->
     <div class="main-content">
-        <!-- Sidebar -->
         <div class="sidebar">
             <ul>
                 <li><a href="dashboard.php" class="<?= ($current_page == 'dashboard.php') ? 'active' : '' ?>">Nadzorna plošča</a></li>
@@ -91,7 +82,6 @@ $current_page = basename($_SERVER['PHP_SELF']); // Pridobi trenutno stran
             </ul>
         </div>
 
-        <!-- Content -->
         <div class="content">
             <h3>Upravljanje razredov</h3>
             
@@ -127,7 +117,6 @@ $current_page = basename($_SERVER['PHP_SELF']); // Pridobi trenutno stran
                 </form>
             <?php elseif ($action == 'edit' && $class_id > 0): ?>
                 <?php
-                // Pridobimo trenutne podatke o razredu
                 $stmt = $conn->prepare("SELECT ime_razreda FROM razredi WHERE ID_razreda = ?");
                 $stmt->bind_param("i", $class_id);
                 $stmt->execute();

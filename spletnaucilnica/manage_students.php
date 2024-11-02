@@ -1,9 +1,7 @@
 <?php
-// manage_students.php
 session_start();
 include('config.php');
 
-// Preverimo, ali je uporabnik prijavljen in ali je administrator
 if (!isset($_SESSION['user_id']) || $_SESSION['role'] != 'administrator') {
     header("Location: index.php");
     exit();
@@ -11,7 +9,6 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] != 'administrator') {
 
 $action = isset($_GET['action']) ? $_GET['action'] : 'list';
 
-// Dodajanje novega učenca
 if ($action == 'add' && isset($_POST['add_student'])) {
     $uporabnisko_ime = $conn->real_escape_string($_POST['uporabnisko_ime']);
     $geslo = password_hash($_POST['geslo'], PASSWORD_DEFAULT);
@@ -48,7 +45,6 @@ if ($action == 'add' && isset($_POST['add_student'])) {
     }
 }
 
-// Urejanje učenca
 if ($action == 'edit' && isset($_POST['edit_student'])) {
     $ID_ucenca = intval($_POST['ID_ucenca']);
     $uporabnisko_ime = $conn->real_escape_string($_POST['uporabnisko_ime']);
@@ -61,7 +57,6 @@ if ($action == 'edit' && isset($_POST['edit_student'])) {
     $stmt = $conn->prepare("UPDATE uporabniki SET uporabnisko_ime = ?, ime = ?, priimek = ?, email = ? WHERE ID_uporabnika = ?");
     $stmt->bind_param("ssssi", $uporabnisko_ime, $ime, $priimek, $email, $ID_ucenca);
     if ($stmt->execute()) {
-        // Posodobimo predmete
         $stmt = $conn->prepare("DELETE FROM ucenci_predmeti WHERE ID_ucenca = ?");
         $stmt->bind_param("i", $ID_ucenca);
         $stmt->execute();
@@ -71,18 +66,15 @@ if ($action == 'edit' && isset($_POST['edit_student'])) {
             $stmt->execute();
         }
 
-        // Preverimo, če učenec že ima dodeljen razred
         $stmt = $conn->prepare("SELECT * FROM ucenci_razredi WHERE ID_ucenca = ?");
         $stmt->bind_param("i", $ID_ucenca);
         $stmt->execute();
         $result = $stmt->get_result();
 
         if ($result->num_rows > 0) {
-            // Če razred že obstaja, ga posodobimo
             $stmt = $conn->prepare("UPDATE ucenci_razredi SET ID_razreda = ? WHERE ID_ucenca = ?");
             $stmt->bind_param("ii", $ID_razreda, $ID_ucenca);
         } else {
-            // Če razred ne obstaja, ga dodamo
             $stmt = $conn->prepare("INSERT INTO ucenci_razredi (ID_ucenca, ID_razreda) VALUES (?, ?)");
             $stmt->bind_param("ii", $ID_ucenca, $ID_razreda);
         }
@@ -95,7 +87,6 @@ if ($action == 'edit' && isset($_POST['edit_student'])) {
 }
 
 
-// Brisanje učenca
 if ($action == 'delete' && isset($_GET['id'])) {
     $ID_ucenca = intval($_GET['id']);
     $stmt = $conn->prepare("DELETE FROM uporabniki WHERE ID_uporabnika = ?");
@@ -107,12 +98,10 @@ if ($action == 'delete' && isset($_GET['id'])) {
     }
 }
 
-// Pridobimo seznam učencev
 $stmt = $conn->prepare("SELECT * FROM uporabniki WHERE vloga = 'učenec'");
 $stmt->execute();
 $ucenci = $stmt->get_result();
 
-// Pridobimo seznam predmetov
 $stmt = $conn->prepare("SELECT * FROM predmeti");
 $stmt->execute();
 $predmeti = $stmt->get_result();
@@ -121,7 +110,6 @@ while ($row = $predmeti->fetch_assoc()) {
     $all_predmeti[] = $row;
 }
 
-// Pridobimo seznam razredov
 $stmt = $conn->prepare("SELECT * FROM razredi");
 $stmt->execute();
 $razredi = $stmt->get_result();
@@ -246,7 +234,7 @@ $current_page = basename($_SERVER['PHP_SELF']);
                 $stmt->bind_param("i", $ID_ucenca);
                 $stmt->execute();
                 $result = $stmt->get_result();
-                $razred_ucenca = $result->fetch_assoc()['ID_razreda'] ?? null; // Privzeta vrednost null, če ni rezultatov
+                $razred_ucenca = $result->fetch_assoc()['ID_razreda'] ?? null;
 
                 $stmt = $conn->prepare("SELECT ID_predmeta FROM ucenci_predmeti WHERE ID_ucenca = ?");
                 $stmt->bind_param("i", $ID_ucenca);

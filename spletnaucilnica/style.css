@@ -1,6 +1,4 @@
-/* style.css */
 
-/* Osnovni slogi */
 body {
     margin: 0;
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -13,12 +11,12 @@ h2 {
     padding: 20px;
 }
 
-/* Zgornja naslovna vrstica */
+
 .header {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    background-color: #badfe9; /* Nova barva headerja */
+    background-color: #badfe9; 
     color: #333;
     padding: 10px 20px;
 }
@@ -49,13 +47,12 @@ h2 {
     text-decoration: underline;
 }
 
-/* Glavni vsebinski del */
+
 .main-content {
     display: flex;
-    height: calc(100vh - 60px); /* Višina okna minus višina naslovne vrstice */
+    height: calc(100vh - 60px);
 }
 
-/* Levi stranski meni */
 .sidebar {
     width: 200px;
     background-color: #fff;
@@ -88,7 +85,6 @@ h2 {
 }
 
 
-/* Vsebina */
 .content {
     flex-grow: 1;
     padding: 20px;
@@ -104,7 +100,6 @@ h2 {
     color: #333;
 }
 
-/* Predmeti */
 .subjects-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
@@ -134,7 +129,6 @@ h2 {
     text-decoration: underline;
 }
 
-/* Gumbi */
 button {
     background-color: #007acc;
     color: #fff;
@@ -162,7 +156,6 @@ textarea {
     border-radius: 4px;
 }
 
-/* Tabele */
 table {
     width: 100%;
     border-collapse: collapse;
@@ -179,7 +172,6 @@ table th {
     color: #333;
 }
 
-/* Zavihki */
 .tabs {
     overflow: hidden;
     background-color: #f1f1f1;
@@ -210,7 +202,6 @@ table th {
     padding: 20px 0;
 }
 
-/* Odzivnost */
 @media (max-width: 768px) {
     .sidebar {
         width: 150px;
@@ -230,9 +221,6 @@ table th {
     }
 }
 
-/* Dodajte naslednje stile v vaš style.css */
-
-/* Centered container */
 .centered-container {
     max-width: 400px;
     margin: 0 auto;
@@ -240,7 +228,6 @@ table th {
     text-align: center;
 }
 
-/* Form container */
 .form-container {
     text-align: left;
 }
@@ -275,7 +262,6 @@ table th {
     background-color: #005f99;
 }
 
-/* Posodobitev headerja za povezavo */
 .header .logo a {
     text-decoration: none;
     color: inherit;

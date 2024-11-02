@@ -1,5 +1,4 @@
 <?php
-// register.php
 include('config.php');
 
 if (isset($_POST['register'])) {
@@ -10,25 +9,20 @@ if (isset($_POST['register'])) {
     $email = $conn->real_escape_string($_POST['email']);
     $razred_id = intval($_POST['razred']);
 
-    // Hashiramo geslo
     $hashed_password = password_hash($password, PASSWORD_DEFAULT);
 
-    // Preverimo, ali uporabniško ime ali email že obstajata
     $stmt = $conn->prepare("SELECT * FROM uporabniki WHERE uporabnisko_ime = ? OR email = ?");
     $stmt->bind_param("ss", $username, $email);
     $stmt->execute();
     $result = $stmt->get_result();
 
     if ($result->num_rows == 0) {
-        // Vstavimo novega uporabnika
         $stmt = $conn->prepare("INSERT INTO uporabniki (uporabnisko_ime, geslo, ime, priimek, email, vloga) VALUES (?, ?, ?, ?, ?, 'učenec')");
         $stmt->bind_param("sssss", $username, $hashed_password, $ime, $priimek, $email);
 
         if ($stmt->execute()) {
-            // Pridobimo ID novovpisanega učenca
             $ucenec_id = $stmt->insert_id;
     
-            // Vstavimo v tabelo ucenci_razredi
             $stmt = $conn->prepare("INSERT INTO ucenci_razredi (ID_ucenca, ID_razreda) VALUES (?, ?)");
             $stmt->bind_param("ii", $ucenec_id, $razred_id);
             $stmt->execute();
@@ -43,7 +37,6 @@ if (isset($_POST['register'])) {
     }
 }
 
-// Pridobimo seznam razredov
 $result = $conn->query("SELECT ID_razreda, ime_razreda FROM razredi");
 ?>
 <!DOCTYPE html>
@@ -54,7 +47,6 @@ $result = $conn->query("SELECT ID_razreda, ime_razreda FROM razredi");
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <!-- Zgornja naslovna vrstica -->
     <div class="header">
         <div class="logo">
             <a href="index.php" style="display: flex; align-items: center; text-decoration: none; color: inherit;">
@@ -64,7 +56,6 @@ $result = $conn->query("SELECT ID_razreda, ime_razreda FROM razredi");
         </div>
     </div>
 
-    <!-- Vsebina -->
     <div class="centered-container">
         <h2>Registracija</h2>
         <?php if (isset($error)) echo "<p style='color:red;'>$error</p>"; ?>

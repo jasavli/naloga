@@ -1,9 +1,7 @@
 <?php
-// view_submissions.php
 session_start();
 include('config.php');
 
-// Preverimo, ali je uporabnik prijavljen in ali je učitelj
 if (!isset($_SESSION['user_id']) || $_SESSION['role'] != 'učitelj') {
     header("Location: index.php");
     exit();
@@ -11,17 +9,14 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] != 'učitelj') {
 
 $user_id = $_SESSION['user_id'];
 
-// Pridobimo predmete, ki jih učitelj poučuje
 $stmt = $conn->prepare("SELECT DISTINCT p.ID_predmeta, p.ime_predmeta FROM predmeti p INNER JOIN ucitelji_predmeti_razredi upr ON p.ID_predmeta = upr.ID_predmeta WHERE upr.ID_ucitelja = ?");
 $stmt->bind_param("i", $user_id);
 $stmt->execute();
 $predmeti = $stmt->get_result();
 
-// Če je izbran predmet
 if (isset($_GET['predmet'])) {
     $predmet_id = intval($_GET['predmet']);
 
-    // Preverimo, ali učitelj poučuje izbrani predmet
     $stmt = $conn->prepare("SELECT COUNT(*) as cnt FROM ucitelji_predmeti_razredi WHERE ID_ucitelja = ? AND ID_predmeta = ?");
     $stmt->bind_param("ii", $user_id, $predmet_id);
     $stmt->execute();
@@ -29,7 +24,6 @@ if (isset($_GET['predmet'])) {
     $row = $result->fetch_assoc();
 
     if ($row['cnt'] > 0) {
-        // Pridobimo oddane naloge za izbrani predmet
         $stmt = $conn->prepare("SELECT n.ID_naloge, n.datum_oddaje, n.pot_do_datoteke, u.ime, u.priimek, np.naslov_naloge
             FROM naloge n
             INNER JOIN uporabniki u ON n.ID_ucenca = u.ID_uporabnika
@@ -44,7 +38,7 @@ if (isset($_GET['predmet'])) {
     }
 }
 
-$current_page = basename($_SERVER['PHP_SELF']); // Pridobi trenutno stran
+$current_page = basename($_SERVER['PHP_SELF']); 
 ?>
 <!DOCTYPE html>
 <html lang="sl">
@@ -54,7 +48,6 @@ $current_page = basename($_SERVER['PHP_SELF']); // Pridobi trenutno stran
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <!-- Zgornja naslovna vrstica -->
     <div class="header">
         <div class="logo">
         <a href="dashboard.php" style="display: flex; align-items: center; text-decoration: none; color: inherit;">
@@ -65,9 +58,7 @@ $current_page = basename($_SERVER['PHP_SELF']); // Pridobi trenutno stran
         <a href="logout.php" class="logout">Odjava</a>
     </div>
 
-    <!-- Glavni vsebinski del -->
     <div class="main-content">
-        <!-- Levi stranski meni -->
         <div class="sidebar">
             <ul>
                 <li><a href="dashboard.php" class="<?= ($current_page == 'dashboard.php') ? 'active' : '' ?>">Nadzorna plošča</a></li>
@@ -76,7 +67,6 @@ $current_page = basename($_SERVER['PHP_SELF']); // Pridobi trenutno stran
             </ul>
         </div>
 
-        <!-- Vsebina -->
         <div class="content">
             <h3>Oddane naloge</h3>
             <?php

@@ -1,9 +1,7 @@
 <?php
-// view_assignment.php
 session_start();
 include('config.php');
 
-// Preverimo, ali je uporabnik prijavljen in ali je učenec
 if (!isset($_SESSION['user_id']) || $_SESSION['role'] != 'učenec' || !isset($_GET['id'])) {
     header("Location: index.php");
     exit();
@@ -12,7 +10,6 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] != 'učenec' || !isset($_G
 $user_id = $_SESSION['user_id'];
 $naloga_id = intval($_GET['id']);
 
-// Preverimo, ali ima učenec dostop do te naloge
 $stmt = $conn->prepare("SELECT n.*, np.naslov_naloge AS naslov_predmeta_naloge, np.opis, np.rok_oddaje, p.ime_predmeta
     FROM naloge n
     INNER JOIN naloge_predmet np ON n.ID_naloge_predmet = np.ID_naloge_predmet
@@ -27,7 +24,6 @@ if (!$naloga) {
     exit();
 }
 
-// Pridobimo komentarje
 $stmt = $conn->prepare("SELECT kn.*, u.ime, u.priimek FROM komentarji_naloge kn INNER JOIN uporabniki u ON kn.ID_avtorja = u.ID_uporabnika WHERE kn.ID_naloge = ? ORDER BY kn.datum_komentarja ASC");
 $stmt->bind_param("i", $naloga_id);
 $stmt->execute();
@@ -41,7 +37,6 @@ $komentarji = $stmt->get_result();
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <!-- Zgornja naslovna vrstica -->
     <div class="header">
         <div class="logo">
         <a href="dashboard.php" style="display: flex; align-items: center; text-decoration: none; color: inherit;">
@@ -52,9 +47,7 @@ $komentarji = $stmt->get_result();
         <a href="logout.php" class="logout">Odjava</a>
     </div>
 
-    <!-- Glavni vsebinski del -->
     <div class="main-content">
-        <!-- Levi stranski meni -->
         <div class="sidebar">
             <ul>
                 <li><a href="dashboard.php" class="<?= ($current_page == 'dashboard.php') ? 'active' : '' ?>">Nadzorna plošča</a></li>
@@ -64,7 +57,6 @@ $komentarji = $stmt->get_result();
             </ul>
         </div>
 
-        <!-- Vsebina -->
         <div class="content">
             <h3><?php echo htmlspecialchars($naloga['naslov_predmeta_naloge']); ?></h3>
             <p><?php echo nl2br(htmlspecialchars($naloga['opis'])); ?></p>
@@ -83,7 +75,6 @@ $komentarji = $stmt->get_result();
                 <?php endwhile; ?>
             </ul>
 
-            <!-- Obrazec za dodajanje komentarja -->
             <form action="add_comment_assignment.php" method="post">
                 <input type="hidden" name="naloga_id" value="<?php echo $naloga_id; ?>">
                 <textarea name="vsebina" required placeholder="Vaš komentar..."></textarea><br>

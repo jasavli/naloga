@@ -1,9 +1,7 @@
 <?php
-// manage_subjects.php
 session_start();
 include('config.php');
 
-// Preverimo, ali je uporabnik prijavljen in ali je administrator
 if (!isset($_SESSION['user_id']) || $_SESSION['role'] != 'administrator') {
     header("Location: index.php");
     exit();
@@ -11,7 +9,6 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] != 'administrator') {
 
 $action = isset($_GET['action']) ? $_GET['action'] : 'list';
 
-// Dodajanje novega predmeta
 if ($action == 'add' && isset($_POST['add_subject'])) {
     $ime_predmeta = $conn->real_escape_string($_POST['ime_predmeta']);
     $opis_predmeta = $conn->real_escape_string($_POST['opis_predmeta']);
@@ -26,7 +23,6 @@ if ($action == 'add' && isset($_POST['add_subject'])) {
     }
 }
 
-// Urejanje predmeta
 if ($action == 'edit' && isset($_POST['edit_subject'])) {
     $ID_predmeta = intval($_POST['ID_predmeta']);
     $ime_predmeta = $conn->real_escape_string($_POST['ime_predmeta']);
@@ -42,7 +38,6 @@ if ($action == 'edit' && isset($_POST['edit_subject'])) {
     }
 }
 
-// Brisanje predmeta
 if ($action == 'delete' && isset($_GET['id'])) {
     $ID_predmeta = intval($_GET['id']);
     $stmt = $conn->prepare("DELETE FROM predmeti WHERE ID_predmeta = ?");
@@ -54,12 +49,11 @@ if ($action == 'delete' && isset($_GET['id'])) {
     }
 }
 
-// Pridobimo seznam predmetov
 $stmt = $conn->prepare("SELECT * FROM predmeti");
 $stmt->execute();
 $predmeti = $stmt->get_result();
 
-$current_page = basename($_SERVER['PHP_SELF']); // Pridobi trenutno stran
+$current_page = basename($_SERVER['PHP_SELF']); 
 ?>
 <!DOCTYPE html>
 <html lang="sl">
@@ -69,7 +63,6 @@ $current_page = basename($_SERVER['PHP_SELF']); // Pridobi trenutno stran
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <!-- Zgornja naslovna vrstica -->
     <div class="header">
         <div class="logo">
             <a href="dashboard.php" style="display: flex; align-items: center; text-decoration: none; color: inherit;">
@@ -80,9 +73,7 @@ $current_page = basename($_SERVER['PHP_SELF']); // Pridobi trenutno stran
         <a href="logout.php" class="logout">Odjava</a>
     </div>
 
-    <!-- Glavni vsebinski del -->
     <div class="main-content">
-        <!-- Levi stranski meni -->
         <div class="sidebar">
             <ul>
                 <li><a href="dashboard.php" class="<?= ($current_page == 'dashboard.php') ? 'active' : '' ?>">Nadzorna plošča</a></li>
@@ -93,7 +84,6 @@ $current_page = basename($_SERVER['PHP_SELF']); // Pridobi trenutno stran
             </ul>
         </div>
 
-        <!-- Vsebina -->
         <div class="content">
             <h3>Upravljanje predmetov</h3>
             <?php

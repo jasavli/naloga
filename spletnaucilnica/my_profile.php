@@ -1,5 +1,4 @@
 <?php
-// my_profile.php
 session_start();
 include('config.php');
 
@@ -11,7 +10,6 @@ if (!isset($_SESSION['user_id'])) {
 $user_id = $_SESSION['user_id'];
 $role = $_SESSION['role'];
 
-// Pridobimo trenutne podatke uporabnika
 $stmt = $conn->prepare("SELECT uporabnisko_ime, ime, priimek, email FROM uporabniki WHERE ID_uporabnika = ?");
 $stmt->bind_param("i", $user_id);
 $stmt->execute();
@@ -27,9 +25,7 @@ if (isset($_POST['update_profile'])) {
     $novo_geslo = $_POST['novo_geslo'];
     $potrdi_geslo = $_POST['potrdi_geslo'];
 
-    // Preverimo, ali želi uporabnik spremeniti geslo
     if (!empty($geslo) && !empty($novo_geslo) && !empty($potrdi_geslo)) {
-        // Preverimo trenutno geslo
         $stmt = $conn->prepare("SELECT geslo FROM uporabniki WHERE ID_uporabnika = ?");
         $stmt->bind_param("i", $user_id);
         $stmt->execute();
@@ -37,10 +33,8 @@ if (isset($_POST['update_profile'])) {
         $user_data = $result->fetch_assoc();
 
         if (password_verify($geslo, $user_data['geslo'])) {
-            // Preverimo, ali se novo geslo ujema
             if ($novo_geslo == $potrdi_geslo) {
                 $hashed_password = password_hash($novo_geslo, PASSWORD_DEFAULT);
-                // Posodobimo podatke z novim geslom
                 $stmt = $conn->prepare("UPDATE uporabniki SET uporabnisko_ime = ?, ime = ?, priimek = ?, email = ?, geslo = ? WHERE ID_uporabnika = ?");
                 $stmt->bind_param("sssssi", $uporabnisko_ime, $ime, $priimek, $email, $hashed_password, $user_id);
             } else {
@@ -50,7 +44,6 @@ if (isset($_POST['update_profile'])) {
             $error = "Napačno trenutno geslo.";
         }
     } else {
-        // Posodobimo podatke brez spreminjanja gesla
         $stmt = $conn->prepare("UPDATE uporabniki SET uporabnisko_ime = ?, ime = ?, priimek = ?, email = ? WHERE ID_uporabnika = ?");
         $stmt->bind_param("ssssi", $uporabnisko_ime, $ime, $priimek, $email, $user_id);
     }
@@ -73,7 +66,6 @@ $current_page = basename($_SERVER['PHP_SELF']);
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <!-- Zgornja naslovna vrstica -->
     <div class="header">
         <div class="logo">
         <a href="dashboard.php" style="display: flex; align-items: center; text-decoration: none; color: inherit;">
@@ -84,9 +76,7 @@ $current_page = basename($_SERVER['PHP_SELF']);
         <a href="logout.php" class="logout">Odjava</a>
     </div>
 
-    <!-- Glavni vsebinski del -->
     <div class="main-content">
-        <!-- Levi stranski meni -->
         <div class="sidebar">
             <ul>
                 <li><a href="dashboard.php" class="<?= ($current_page == 'dashboard.php') ? 'active' : '' ?>">Nadzorna plošča</a></li>
@@ -99,7 +89,6 @@ $current_page = basename($_SERVER['PHP_SELF']);
             </ul>
         </div>
 
-        <!-- Vsebina -->
         <div class="content">
             <h3>Moj profil</h3>
             <?php
