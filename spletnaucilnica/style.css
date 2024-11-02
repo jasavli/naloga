@@ -282,3 +282,7 @@ table th {
 }
 
 
+textarea {
+    resize: none;
+    font-family: inherit;
+}

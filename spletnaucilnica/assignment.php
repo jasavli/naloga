@@ -107,6 +107,8 @@ $stmt->execute();
 $komentarji = $stmt->get_result();
 
 $current_page = basename($_SERVER['PHP_SELF']); // Pridobi trenutno stran
+
+
 ?>
 <!DOCTYPE html>
 <html lang="sl">
@@ -144,7 +146,11 @@ $current_page = basename($_SERVER['PHP_SELF']); // Pridobi trenutno stran
             <ul>
                 <li><a href="dashboard.php" class="<?= ($current_page == 'dashboard.php') ? 'active' : '' ?>">Nadzorna plošča</a></li>
                 <li><a href="my_profile.php" class="<?= ($current_page == 'my_profile.php') ? 'active' : '' ?>">Moj profil</a></li>
-                <li><a href="my_assignments.php" class="<?= ($current_page == 'my_assignments.php') ? 'active' : '' ?>">Moje naloge</a></li>
+                <?php if ($vloga == 'učitelj'): ?>
+                    <li><a href="view_submissions.php" class="<?= ($current_page == 'view_submissions.php') ? 'active' : '' ?>">Oddane naloge</a></li>
+                <?php elseif ($vloga == 'učenec'): ?>
+                    <li><a href="my_assignments.php" class="<?= ($current_page == 'my_assignments.php') ? 'active' : '' ?>">Moje naloge</a></li>
+                <?php endif; ?>
             </ul>
         </div>
 
@@ -226,12 +232,20 @@ $current_page = basename($_SERVER['PHP_SELF']); // Pridobi trenutno stran
             </ul>
 
             <!-- Comment form -->
-            <form action="add_comment_assignment.php" method="post">
+            <form action="add_comment_assignment.php" method="post" onsubmit="trimTextarea()">
                 <input type="hidden" name="naloga_predmet_id" value="<?php echo $naloga_predmet_id; ?>">
                 <textarea name="vsebina" required placeholder="Vaš komentar..."></textarea><br>
                 <button type="submit">Dodaj komentar</button>
             </form>
+
+            <script>
+            function trimTextarea() {
+                const textarea = document.getElementById('opis_naloge');
+                textarea.value = textarea.value.trimEnd(); // JavaScript trim
+            }
+            </script>
         </div>
     </div>
+    
 </body>
 </html>

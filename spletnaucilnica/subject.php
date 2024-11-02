@@ -43,6 +43,11 @@ $stmt->bind_param("i", $predmet_id);
 $stmt->execute();
 $predmet = $stmt->get_result()->fetch_assoc();
 
+// Function to sanitize text and remove trailing newlines
+function sanitize_input($text) {
+    return rtrim($text); // Removes trailing whitespace and newlines
+}
+
 // Delete material if requested by the teacher
 if ($vloga == 'učitelj' && isset($_GET['delete_material'])) {
     $material_id = intval($_GET['delete_material']);
@@ -69,7 +74,7 @@ if ($vloga == 'učitelj' && isset($_GET['delete_assignment'])) {
 
 // Handle material upload
 if ($vloga == 'učitelj' && isset($_POST['upload_material'])) {
-    $naslov_gradiva = $conn->real_escape_string($_POST['naslov_gradiva']);
+    $naslov_gradiva = sanitize_input($conn->real_escape_string($_POST['naslov_gradiva']));
     $datoteka_gradiva = $_FILES['datoteka_gradiva']['name'];
     $target_dir = "uploads/materials/";
 
@@ -94,8 +99,8 @@ if ($vloga == 'učitelj' && isset($_POST['upload_material'])) {
 
 // Handle assignment addition
 if ($vloga == 'učitelj' && isset($_POST['add_assignment'])) {
-    $naslov_naloge = $conn->real_escape_string($_POST['naslov_naloge']);
-    $opis_naloge = $conn->real_escape_string($_POST['opis_naloge']);
+    $naslov_naloge = sanitize_input($conn->real_escape_string($_POST['naslov_naloge']));
+    $opis_naloge = sanitize_input($conn->real_escape_string($_POST['opis_naloge']));
     $rok_oddaje = $_POST['rok_oddaje'];
     $datoteka_naloge = $_FILES['datoteka_naloge']['name'];
     $target_dir = "uploads/assignments/";
@@ -146,6 +151,7 @@ $current_page = basename($_SERVER['PHP_SELF']);
         .tabs {
             display: flex;
             background-color: #eee;
+            border-bottom: 2px solid #ccc;
         }
         .tabs button {
             background-color: #007acc;
@@ -156,6 +162,7 @@ $current_page = basename($_SERVER['PHP_SELF']);
             transition: background-color 0.3s ease;
             margin-right: 10px;
             border-radius: 4px;
+            font-family: inherit;
         }
         .tabs button:hover {
             background-color: #005f99;
@@ -176,9 +183,14 @@ $current_page = basename($_SERVER['PHP_SELF']);
             border-radius: 4px;
             cursor: pointer;
             margin-top: 10px;
+            font-family: inherit;
         }
         .form-container button:hover {
             background-color: #005f99;
+        }
+        textarea {
+            resize: none;
+            font-family: inherit;
         }
     </style>
 </head>
@@ -211,7 +223,7 @@ $current_page = basename($_SERVER['PHP_SELF']);
             </ul>
         </div>
 
-        <!-- Content Area -->
+        <!-- Main Content for Materials and Assignments -->
         <div class="content">
             <h3><?php echo htmlspecialchars($predmet['ime_predmeta']); ?></h3>
             <p><?php echo nl2br(htmlspecialchars($predmet['opis_predmeta'])); ?></p>
@@ -231,7 +243,6 @@ $current_page = basename($_SERVER['PHP_SELF']);
                 $stmt->execute();
                 $gradiva = $stmt->get_result();
                 ?>
-
                 <?php if ($gradiva->num_rows > 0): ?>
                     <ul>
                         <?php while ($gradivo = $gradiva->fetch_assoc()): ?>
@@ -249,7 +260,7 @@ $current_page = basename($_SERVER['PHP_SELF']);
                 <?php else: ?>
                     <p>Ni gradiv za ta predmet.</p>
                 <?php endif; ?>
-
+                <!-- Material Upload Form -->
                 <?php if ($vloga == 'učitelj'): ?>
                     <h4>Naloži novo gradivo</h4>
                     <?php if (isset($success_material)) echo "<p style='color:green;'>$success_material</p>"; ?>
@@ -273,7 +284,6 @@ $current_page = basename($_SERVER['PHP_SELF']);
                 $stmt->execute();
                 $naloge = $stmt->get_result();
                 ?>
-
                 <?php if ($naloge->num_rows > 0): ?>
                     <ul>
                         <?php while ($naloga = $naloge->fetch_assoc()): ?>
@@ -292,6 +302,7 @@ $current_page = basename($_SERVER['PHP_SELF']);
                     <p>Ni nalog za ta predmet.</p>
                 <?php endif; ?>
 
+                <!-- Assignment Form -->
                 <?php if ($vloga == 'učitelj'): ?>
                     <h4>Dodaj novo nalogo</h4>
                     <?php if (isset($success_assignment)) echo "<p style='color:green;'>$success_assignment</p>"; ?>
