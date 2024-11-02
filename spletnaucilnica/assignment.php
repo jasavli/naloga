@@ -105,6 +105,8 @@ $stmt = $conn->prepare("SELECT kn.*, u.ime, u.priimek FROM komentarji_naloge kn 
 $stmt->bind_param("i", $naloga_predmet_id);
 $stmt->execute();
 $komentarji = $stmt->get_result();
+
+$current_page = basename($_SERVER['PHP_SELF']); // Pridobi trenutno stran
 ?>
 <!DOCTYPE html>
 <html lang="sl">
@@ -140,9 +142,9 @@ $komentarji = $stmt->get_result();
         <!-- Sidebar -->
         <div class="sidebar">
             <ul>
-                <li><a href="subject.php?id=<?php echo $predmet_id; ?>">Nazaj na predmet</a></li>
-                <li><a href="my_profile.php">Moj profil</a></li>
-                <li><a href="my_assignments.php">Naloge</a></li>
+                <li><a href="dashboard.php" class="<?= ($current_page == 'dashboard.php') ? 'active' : '' ?>">Nadzorna plošča</a></li>
+                <li><a href="my_profile.php" class="<?= ($current_page == 'my_profile.php') ? 'active' : '' ?>">Moj profil</a></li>
+                <li><a href="my_assignments.php" class="<?= ($current_page == 'my_assignments.php') ? 'active' : '' ?>">Moje naloge</a></li>
             </ul>
         </div>
 

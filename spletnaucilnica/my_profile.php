@@ -59,6 +59,9 @@ if (isset($_POST['update_profile'])) {
         $error = "Napaka pri posodabljanju profila: " . $conn->error;
     }
 }
+
+$current_page = basename($_SERVER['PHP_SELF']); // Pridobi trenutno stran
+
 ?>
 <!DOCTYPE html>
 <html lang="sl">
@@ -84,7 +87,9 @@ if (isset($_POST['update_profile'])) {
         <!-- Levi stranski meni -->
         <div class="sidebar">
             <ul>
-                <li><a href="my_assignments.php">Moje naloge</a></li>
+                <li><a href="dashboard.php" class="<?= ($current_page == 'dashboard.php') ? 'active' : '' ?>">Nadzorna plošča</a></li>
+                <li><a href="my_profile.php" class="<?= ($current_page == 'my_profile.php') ? 'active' : '' ?>">Moj profil</a></li>
+                <li><a href="my_assignments.php" class="<?= ($current_page == 'my_assignments.php') ? 'active' : '' ?>">Moje naloge</a></li>
             </ul>
         </div>
 

@@ -57,9 +57,10 @@ $komentarji = $stmt->get_result();
         <!-- Levi stranski meni -->
         <div class="sidebar">
             <ul>
-                <li><a href="subject.php?id=<?php echo $naloga['ID_predmeta']; ?>">Nazaj na predmet</a></li>
-                <li><a href="my_profile.php">Moj profil</a></li>
-                <li><a href="my_assignments.php">Moje naloge</a></li>
+                <li><a href="dashboard.php" class="<?= ($current_page == 'dashboard.php') ? 'active' : '' ?>">Nadzorna plošča</a></li>
+                <li><a href="my_profile.php" class="<?= ($current_page == 'my_profile.php') ? 'active' : '' ?>">Moj profil</a></li>
+                <li><a href="upload_materials.php" class="<?= ($current_page == 'upload_materials.php') ? 'active' : '' ?>">Nalaganje gradiv</a></li>
+                <li><a href="view_submissions.php" class="<?= ($current_page == 'view_submissions.php') ? 'active' : '' ?>">Oddane naloge</a></li>
             </ul>
         </div>
 

@@ -94,6 +94,9 @@ $stmt = $conn->prepare("SELECT g.*, p.ime_predmeta FROM gradiva g INNER JOIN pre
 $stmt->bind_param("i", $user_id);
 $stmt->execute();
 $gradiva = $stmt->get_result();
+
+$current_page = basename($_SERVER['PHP_SELF']); // Pridobi trenutno stran
+
 ?>
 <!DOCTYPE html>
 <html lang="sl">
@@ -119,10 +122,10 @@ $gradiva = $stmt->get_result();
         <!-- Levi stranski meni -->
         <div class="sidebar">
             <ul>
-                
-                <li><a href="upload_materials.php" <?php if (basename($_SERVER['PHP_SELF']) == 'upload_materials.php') echo 'class="active"'; ?>>Gradiva</a></li>
-                <li><a href="view_submissions.php" <?php if (basename($_SERVER['PHP_SELF']) == 'view_submissions.php') echo 'class="active"'; ?>>Oddane naloge</a></li>
-                <li><a href="my_profile.php" <?php if (basename($_SERVER['PHP_SELF']) == 'my_profile.php') echo 'class="active"'; ?>>Moj profil</a></li>
+                <li><a href="dashboard.php" class="<?= ($current_page == 'dashboard.php') ? 'active' : '' ?>">Nadzorna plošča</a></li>
+                <li><a href="my_profile.php" class="<?= ($current_page == 'my_profile.php') ? 'active' : '' ?>">Moj profil</a></li>
+                <li><a href="upload_materials.php" class="<?= ($current_page == 'upload_materials.php') ? 'active' : '' ?>">Nalaganje gradiv</a></li>
+                <li><a href="view_submissions.php" class="<?= ($current_page == 'view_submissions.php') ? 'active' : '' ?>">Oddane naloge</a></li>
             </ul>
         </div>
 

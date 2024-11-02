@@ -57,6 +57,7 @@ if (isset($_GET['success'])) {
 if (isset($_GET['error'])) {
     $error = urldecode($_GET['error']);
 }
+$current_page = basename($_SERVER['PHP_SELF']); // Pridobi trenutno stran
 ?>
 <!DOCTYPE html>
 <html lang="sl">
@@ -153,18 +154,20 @@ if (isset($_GET['error'])) {
         <div class="sidebar">
             <ul>
                 <?php if ($vloga == 'administrator'): ?>
-                    <li><a href="manage_subjects.php">Upravljanje predmetov</a></li>
-                    <li><a href="manage_teachers.php">Upravljanje učiteljev</a></li>
-                    <li><a href="manage_students.php">Upravljanje učencev</a></li>
+                    <li><a href="dashboard.php" class="<?= ($current_page == 'dashboard.php') ? 'active' : '' ?>">Nadzorna plošča</a></li>
+                    <li><a href="manage_subjects.php" class="<?= ($current_page == 'manage_subjects.php') ? 'active' : '' ?>">Upravljanje predmetov</a></li>
+                    <li><a href="manage_teachers.php" class="<?= ($current_page == 'manage_teachers.php') ? 'active' : '' ?>">Upravljanje učiteljev</a></li>
+                    <li><a href="manage_students.php" class="<?= ($current_page == 'manage_students.php') ? 'active' : '' ?>">Upravljanje učencev</a></li>
                 <?php elseif ($vloga == 'učitelj'): ?>
-                    <li><a href="my_profile.php">Moj profil</a></li>
-                    <li><a href="upload_materials.php">Nalaganje gradiv</a></li>
-                    <li><a href="view_submissions.php">Oddane naloge</a></li>
+                    <li><a href="dashboard.php" class="<?= ($current_page == 'dashboard.php') ? 'active' : '' ?>">Nadzorna plošča</a></li>
+                    <li><a href="my_profile.php" class="<?= ($current_page == 'my_profile.php') ? 'active' : '' ?>">Moj profil</a></li>
+                    <li><a href="upload_materials.php" class="<?= ($current_page == 'upload_materials.php') ? 'active' : '' ?>">Nalaganje gradiv</a></li>
+                    <li><a href="view_submissions.php" class="<?= ($current_page == 'view_submissions.php') ? 'active' : '' ?>">Oddane naloge</a></li>
                 <?php elseif ($vloga == 'učenec'): ?>
-                    <li><a href="my_profile.php">Moj profil</a></li>
-                    <li><a href="my_assignments.php">Moje naloge</a></li>
+                    <li><a href="dashboard.php" class="<?= ($current_page == 'dashboard.php') ? 'active' : '' ?>">Nadzorna plošča</a></li>
+                    <li><a href="my_profile.php" class="<?= ($current_page == 'my_profile.php') ? 'active' : '' ?>">Moj profil</a></li>
+                    <li><a href="my_assignments.php" class="<?= ($current_page == 'my_assignments.php') ? 'active' : '' ?>">Moje naloge</a></li>
                 <?php endif; ?>
-                <li><a href="logout.php">Odjava</a></li>
             </ul>
         </div>
 

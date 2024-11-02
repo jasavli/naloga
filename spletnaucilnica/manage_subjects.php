@@ -58,6 +58,8 @@ if ($action == 'delete' && isset($_GET['id'])) {
 $stmt = $conn->prepare("SELECT * FROM predmeti");
 $stmt->execute();
 $predmeti = $stmt->get_result();
+
+$current_page = basename($_SERVER['PHP_SELF']); // Pridobi trenutno stran
 ?>
 <!DOCTYPE html>
 <html lang="sl">
@@ -83,11 +85,11 @@ $predmeti = $stmt->get_result();
         <!-- Levi stranski meni -->
         <div class="sidebar">
             <ul>
-                <li><a href="dashboard.php">Nadzorna plošča</a></li>
-                <li><a href="manage_subjects.php" class="active">Upravljanje predmetov</a></li>
-                <li><a href="manage_teachers.php">Upravljanje učiteljev</a></li>
-                <li><a href="manage_students.php">Upravljanje učencev</a></li>
-                <li><a href="logout.php">Odjava</a></li>
+                <li><a href="dashboard.php" class="<?= ($current_page == 'dashboard.php') ? 'active' : '' ?>">Nadzorna plošča</a></li>
+                <li><a href="manage_subjects.php" class="<?= ($current_page == 'manage_subjects.php') ? 'active' : '' ?>">Upravljanje predmetov</a></li>
+                <li><a href="manage_teachers.php" class="<?= ($current_page == 'manage_teachers.php') ? 'active' : '' ?>">Upravljanje učiteljev</a></li>
+                <li><a href="manage_students.php" class="<?= ($current_page == 'manage_students.php') ? 'active' : '' ?>">Upravljanje učencev</a></li>
+                <li><a href="manage_classes.php" class="<?= ($current_page == 'manage_classes.php') ? 'active' : '' ?>">Upravljanje razredov</a></li>
             </ul>
         </div>
 

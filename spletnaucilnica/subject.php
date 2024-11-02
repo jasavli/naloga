@@ -117,6 +117,8 @@ if ($vloga == 'učenec' && isset($_POST['leave_subject'])) {
         $error_leave = "Napaka pri zapuščanju predmeta: " . $conn->error;
     }
 }
+
+$current_page = basename($_SERVER['PHP_SELF']); // Pridobi trenutno stran
 ?>
 
 <!DOCTYPE html>
@@ -174,14 +176,15 @@ if ($vloga == 'učenec' && isset($_POST['leave_subject'])) {
         <div class="sidebar">
             <ul>
                 <?php if ($vloga == 'učitelj'): ?>
-                    <li><a href="dashboard.php">Nadzorna plošča</a></li>
-                    <li><a href="my_profile.php">Moj profil</a></li>
+                    <li><a href="dashboard.php" class="<?= ($current_page == 'dashboard.php') ? 'active' : '' ?>">Nadzorna plošča</a></li>
+                    <li><a href="my_profile.php" class="<?= ($current_page == 'my_profile.php') ? 'active' : '' ?>">Moj profil</a></li>
+                    <li><a href="upload_materials.php" class="<?= ($current_page == 'upload_materials.php') ? 'active' : '' ?>">Nalaganje gradiv</a></li>
+                    <li><a href="view_submissions.php" class="<?= ($current_page == 'view_submissions.php') ? 'active' : '' ?>">Oddane naloge</a></li>
                 <?php elseif ($vloga == 'učenec'): ?>
-                    <li><a href="dashboard.php">Nadzorna plošča</a></li>
-                    <li><a href="my_assignments.php">Moje naloge</a></li>
-                    <li><a href="my_profile.php">Moj profil</a></li>
+                    <li><a href="dashboard.php" class="<?= ($current_page == 'dashboard.php') ? 'active' : '' ?>">Nadzorna plošča</a></li>
+                    <li><a href="my_profile.php" class="<?= ($current_page == 'my_profile.php') ? 'active' : '' ?>">Moj profil</a></li>
+                    <li><a href="my_assignments.php" class="<?= ($current_page == 'my_assignments.php') ? 'active' : '' ?>">Moje naloge</a></li>
                 <?php endif; ?>
-                <li><a href="logout.php">Odjava</a></li>
             </ul>
         </div>
 
