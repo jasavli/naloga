@@ -64,6 +64,7 @@ $stmt->execute();
 $oddane_naloge = $stmt->get_result();
 
 $current_page = basename($_SERVER['PHP_SELF']); // Pridobi trenutno stran
+
 ?>
 <!DOCTYPE html>
 <html lang="sl">
@@ -71,6 +72,30 @@ $current_page = basename($_SERVER['PHP_SELF']); // Pridobi trenutno stran
     <meta charset="UTF-8">
     <title>Moje naloge</title>
     <link rel="stylesheet" href="style.css">
+    <style>
+        /* Uskladitev tabel za naloge */
+    .assignment-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    .assignment-table th,
+    .assignment-table td {
+        padding: 10px;
+        text-align: left;
+        border: 1px solid #ddd;
+    }
+
+    .assignment-table th {
+        background-color: #cce7f0;
+        font-weight: bold;
+    }
+
+    .assignment-table tr:nth-child(even) {
+        background-color: #f9f9f9;
+    }
+
+    </style>
 </head>
 <body>
     <!-- Zgornja naslovna vrstica -->
@@ -99,7 +124,7 @@ $current_page = basename($_SERVER['PHP_SELF']); // Pridobi trenutno stran
         <div class="content">
             <h3>Naloge za oddajo</h3>
             <?php if ($naloge_za_oddajo->num_rows > 0): ?>
-                <table>
+                <table class="assignment-table">
                     <tr>
                         <th>Predmet</th>
                         <th>Naslov naloge</th>
@@ -121,7 +146,7 @@ $current_page = basename($_SERVER['PHP_SELF']); // Pridobi trenutno stran
 
             <h3>Oddane naloge</h3>
             <?php if ($oddane_naloge->num_rows > 0): ?>
-                <table>
+                <table class="assignment-table">
                     <tr>
                         <th>Predmet</th>
                         <th>Naslov naloge</th>
