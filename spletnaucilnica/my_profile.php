@@ -10,11 +10,16 @@ if (!isset($_SESSION['user_id'])) {
 $user_id = $_SESSION['user_id'];
 $role = $_SESSION['role'];
 
-$stmt = $conn->prepare("SELECT uporabnisko_ime, ime, priimek, email FROM uporabniki WHERE ID_uporabnika = ?");
-$stmt->bind_param("i", $user_id);
-$stmt->execute();
-$result = $stmt->get_result();
-$user = $result->fetch_assoc();
+// Pridobimo ime, priimek, uporabniško ime in email uporabnika
+function fetchUserProfile($conn, $user_id) {
+    $stmt = $conn->prepare("SELECT uporabnisko_ime, ime, priimek, email FROM uporabniki WHERE ID_uporabnika = ?");
+    $stmt->bind_param("i", $user_id);
+    $stmt->execute();
+    return $stmt->get_result()->fetch_assoc();
+}
+
+// Pridobimo začetne podatke o uporabniku
+$user = fetchUserProfile($conn, $user_id);
 
 if (isset($_POST['update_profile'])) {
     $uporabnisko_ime = $conn->real_escape_string($_POST['uporabnisko_ime']);
@@ -50,13 +55,14 @@ if (isset($_POST['update_profile'])) {
 
     if (!isset($error) && $stmt->execute()) {
         $success = "Profil je bil uspešno posodobljen.";
+        // Fetch updated user data after successful update
+        $user = fetchUserProfile($conn, $user_id);
     } elseif (!isset($error)) {
         $error = "Napaka pri posodabljanju profila: " . $conn->error;
     }
 }
 
 $current_page = basename($_SERVER['PHP_SELF']);
-
 ?>
 <!DOCTYPE html>
 <html lang="sl">
